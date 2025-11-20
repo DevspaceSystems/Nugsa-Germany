@@ -1,0 +1,297 @@
+import { BookOpen, MessageSquare, ArrowRight, Users, Shield, GraduationCap, Award, Globe, TrendingUp, CheckCircle2, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function Home() {
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    activeStudents: 0,
+    germanStates: 0,
+    universities: 0
+  });
+
+  useEffect(() => {
+    fetchPublicStats();
+  }, []);
+
+  const fetchPublicStats = async () => {
+  try {
+    const { count: activeStudents } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("is_verified", true);
+
+    const { data: statesData } = await supabase
+      .from("profiles")
+      .select("india_state")
+      .eq("is_verified", true)
+      .not("india_state", "is", null);
+
+    const uniqueStates = new Set(
+        statesData?.map(item => item.india_state?.trim().toLowerCase()).filter(Boolean)
+    );
+
+    const { data: universitiesData } = await supabase
+      .from("profiles")
+      .select("university")
+      .eq("is_verified", true)
+      .not("university", "is", null);
+
+    const uniqueUniversities = new Set(
+        universitiesData?.map(item => item.university?.trim().toLowerCase()).filter(Boolean)
+    );
+
+    setStats({
+      activeStudents: activeStudents || 0,
+      germanStates: uniqueStates.size,
+      universities: uniqueUniversities.size
+    });
+  } catch (error) {
+      console.error("Error fetching public stats:", error);
+  }
+};
+
+  const features = [
+    {
+      icon: Users,
+      title: "Student Network",
+      description: "Connect with fellow Ghanaian students across Germany's universities and cities.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      link: "/students"
+    },
+    {
+      icon: Shield,
+      title: "Support Services",
+      description: "Access financial assistance, academic support, and emergency help when you need it most.",
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+      link: "/assistance"
+    },
+    {
+      icon: BookOpen,
+      title: "Latest Updates",
+      description: "Stay informed with announcements, opportunities, and important news from NUGSA-Germany.",
+      color: "text-secondary",
+      bgColor: "bg-secondary/10",
+      link: "/announcements"
+    },
+    {
+      icon: GraduationCap,
+      title: "Academic Excellence",
+      description: "Resources, mentorship, and programs designed to support your academic journey in Germany.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      link: "/support"
+    }
+  ];
+
+  const benefits = [
+    "Verified student community across Germany",
+    "24/7 support and assistance programs",
+    "Academic and professional development resources",
+    "Cultural events and networking opportunities",
+    "Emergency financial support when needed"
+  ];
+
+  const statsData = [
+    { number: stats.activeStudents > 0 ? `${stats.activeStudents}+` : "500+", label: "Active Members", icon: Users },
+    { number: stats.germanStates > 0 ? `${stats.germanStates}+` : "16", label: "German States", icon: MapPin },
+    { number: stats.universities > 0 ? `${stats.universities}+` : "50+", label: "Universities", icon: GraduationCap },
+    { number: "24/7", label: "Support Available", icon: Shield },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative hero-background text-white overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+        
+        <div className="relative section-container section-padding">
+          <div className="max-w-4xl mx-auto text-center fade-in">
+            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 border border-white/20">
+              <Award className="w-4 h-4" />
+              <span className="text-sm font-medium">Official Student Association</span>
+            </div>
+            
+            <h1 className="heading-1 text-white mb-6 leading-tight">
+              Welcome to NUGSA-Germany
+            </h1>
+            
+            <p className="body-large text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
+              The National Union of Ghanaian Student Associations in Germany. 
+              Empowering students through community, support, and excellence.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {user ? (
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
+                  <Link to="/dashboard">
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
+                <Link to="/auth">
+                  Join Our Community
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
+                <Link to="/about">Learn More</Link>
+              </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="relative border-t border-white/20 bg-white/5 backdrop-blur-sm">
+          <div className="section-container py-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {statsData.map((stat, index) => (
+                <div key={index} className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <stat.icon className="w-5 h-5 text-secondary mr-2" />
+                    <div className="text-3xl md:text-4xl font-bold text-white">
+                      {stat.number}
+                    </div>
+                  </div>
+                  <div className="text-sm text-white/80 font-medium">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="section-padding bg-gray-50">
+        <div className="section-container">
+          <div className="text-center mb-16 slide-up">
+            <h2 className="heading-2 mb-4">Everything You Need to Succeed</h2>
+            <p className="body-large max-w-2xl mx-auto">
+              Comprehensive resources and support designed specifically for Ghanaian students in Germany
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <Link key={index} to={feature.link} className="group">
+                <Card className="professional-card-elevated h-full hover:border-primary/50 transition-all">
+                  <CardHeader>
+                    <div className={`w-14 h-14 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <feature.icon className={`w-7 h-7 ${feature.color}`} />
+                    </div>
+                    <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">
+                      {feature.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </CardDescription>
+                    <div className="mt-4 flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                      <span>Learn more</span>
+                      <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="section-padding bg-white">
+        <div className="section-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="slide-up">
+              <h2 className="heading-2 mb-6">Why Join NUGSA-Germany?</h2>
+              <p className="body-large mb-8 text-muted-foreground">
+                Become part of a thriving community that supports your academic journey, 
+                professional growth, and cultural connection in Germany.
+              </p>
+              <ul className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start space-x-3">
+                    <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground font-medium">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8">
+                <Button asChild size="lg" className="btn-primary">
+                  <Link to={user ? "/dashboard" : "/auth"}>
+                    {user ? "Explore Dashboard" : "Get Started Today"}
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="professional-card-elevated p-8">
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Nationwide Network</h3>
+                      <p className="text-sm text-muted-foreground">Connect with students across all German states</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-secondary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Career Development</h3>
+                      <p className="text-sm text-muted-foreground">Access job opportunities and professional mentorship</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                      <Award className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Recognition Programs</h3>
+                      <p className="text-sm text-muted-foreground">Celebrate achievements and academic excellence</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="section-padding bg-primary text-white">
+        <div className="section-container text-center">
+          <h2 className="heading-2 text-white mb-4">Ready to Begin Your Journey?</h2>
+          <p className="body-large text-white/90 mb-8 max-w-2xl mx-auto">
+            Join hundreds of Ghanaian students who are building their future in Germany. 
+            Your success is our mission.
+          </p>
+          <Button asChild size="lg" variant="secondary" className="text-base font-semibold px-8 py-6">
+            <Link to={user ? "/dashboard" : "/auth"}>
+              {user ? "Go to Dashboard" : "Create Your Account"}
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+}

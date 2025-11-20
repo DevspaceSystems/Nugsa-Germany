@@ -1,0 +1,4 @@
+# Supabase Project Configuration
+# Replace with your new project reference ID
+# You can find this in your Supabase project URL: https://[PROJECT_REF].supabase.co
+project_id = "your-project-ref-here"

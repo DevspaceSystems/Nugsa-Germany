@@ -1,0 +1,204 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* NUGSA-Germany Professional Design System */
+
+@layer base {
+  :root {
+    /* Professional Navy & Gold Color Scheme */
+    --background: 0 0% 100%;
+    --foreground: 220 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 15%;
+
+    /* Primary: Deep Navy Blue (Professional) */
+    --primary: 220 50% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Rich Gold (Accent) */
+    --secondary: 45 90% 50%;
+    --secondary-foreground: 220 30% 15%;
+
+    /* Muted: Soft Gray */
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 45%;
+
+    /* Accent: German Red */
+    --accent: 0 75% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 50% 25%;
+
+    --radius: 0.5rem;
+
+    /* Professional gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 50% 25%), hsl(220 45% 35%));
+    --gradient-accent: linear-gradient(135deg, hsl(45 90% 50%), hsl(45 85% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 50% 25%) 0%, hsl(220 40% 30%) 50%, hsl(220 50% 25%) 100%);
+
+    --sidebar-background: 220 20% 98%;
+    --sidebar-foreground: 220 30% 15%;
+    --sidebar-primary: 220 50% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 90% 50%;
+    --sidebar-accent-foreground: 220 30% 15%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 220 50% 25%;
+  }
+
+  .dark {
+    --background: 220 30% 8%;
+    --foreground: 220 15% 95%;
+
+    --card: 220 25% 12%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 220 25% 12%;
+    --popover-foreground: 220 15% 95%;
+
+    --primary: 220 50% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 80% 55%;
+    --secondary-foreground: 220 30% 8%;
+
+    --muted: 220 20% 18%;
+    --muted-foreground: 220 10% 70%;
+
+    --accent: 0 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 25%;
+    --input: 220 20% 25%;
+    --ring: 220 50% 45%;
+
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 220 50% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 20%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 20% 25%;
+    --sidebar-ring: 220 50% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Professional Card Styles */
+  .professional-card {
+    @apply bg-white border border-gray-200 rounded-lg;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .professional-card-elevated {
+    @apply bg-white border border-gray-200 rounded-lg;
+    @apply shadow-md hover:shadow-lg transition-all duration-200;
+  }
+
+  /* Professional Button Styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-md;
+    @apply transition-all duration-200 hover:bg-primary/90;
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground font-semibold px-6 py-3 rounded-md;
+    @apply transition-all duration-200 hover:bg-secondary/90;
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary font-semibold px-6 py-3 rounded-md;
+    @apply transition-all duration-200 hover:bg-primary hover:text-white;
+    @apply bg-transparent;
+  }
+
+  /* Professional Input Styles */
+  .input-professional {
+    @apply border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply transition-all duration-200 rounded-md;
+    @apply shadow-sm;
+  }
+
+  /* Section Styles */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  /* Typography */
+  .heading-1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold text-foreground;
+  }
+
+  .heading-2 {
+    @apply text-3xl md:text-4xl font-bold text-foreground;
+  }
+
+  .heading-3 {
+    @apply text-2xl md:text-3xl font-semibold text-foreground;
+  }
+
+  .body-large {
+    @apply text-lg md:text-xl text-muted-foreground;
+  }
+
+  .gradient-text-primary {
+    @apply bg-gradient-to-r from-primary via-primary/90 to-primary bg-clip-text text-transparent;
+  }
+
+  .gradient-text-accent {
+    @apply bg-gradient-to-r from-secondary via-secondary/90 to-secondary bg-clip-text text-transparent;
+  }
+
+  /* Hero Section */
+  .hero-background {
+    background: linear-gradient(135deg, hsl(220 50% 25%) 0%, hsl(220 40% 30%) 50%, hsl(220 50% 25%) 100%);
+  }
+
+  /* Professional Animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
