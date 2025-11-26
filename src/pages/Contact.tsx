@@ -89,7 +89,7 @@ export default function Contact() {
             Contact NUGSA - Germany
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have questions, suggestions, or need assistance? We're here to help! 
+            Have questions, suggestions, or need assistance? We're here to help!
             Reach out to the NUGSA - Germany community and our dedicated team.
           </p>
         </div>
@@ -191,9 +191,9 @@ export default function Contact() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl flex items-center">
-                  <img 
-                    src="/icon.png" 
-                    alt="NUGSA Logo" 
+                  <img
+                    src="/icon.png"
+                    alt="NUGSA Logo"
                     className="w-8 h-8 mr-3"
                   />
                   NUGSA - Germany Executive Team
@@ -241,30 +241,30 @@ export default function Contact() {
             {/* Quick Contact Options */}
             <Card>
               <CardHeader>
-            <CardTitle className="text-xl">Quick Actions</CardTitle>
+                <CardTitle className="text-xl">Quick Actions</CardTitle>
                 <CardDescription>
                   Need immediate assistance? Try these options
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  className="w-full justify-start" 
+                <Button
+                  className="w-full justify-start"
                   variant="outline"
                   onClick={() => window.open(orgSettings.contact_info?.whatsapp_link || "#", "_blank")}
                 >
                   <MessageSquare className="w-4 h-4 mr-3" />
                   Join WhatsApp Group
                 </Button>
-                <Button 
-                  className="w-full justify-start" 
+                <Button
+                  className="w-full justify-start"
                   variant="outline"
                   onClick={() => window.open(`tel:${orgSettings.contact_info?.phone || "+919876543210"}`, "_self")}
                 >
                   <Phone className="w-4 h-4 mr-3" />
                   Emergency Hotline
                 </Button>
-                <Button 
-                  className="w-full justify-start" 
+                <Button
+                  className="w-full justify-start"
                   variant="outline"
                   onClick={() => window.open(`mailto:${orgSettings.contact_info?.email || "info@nugsa.de"}`, "_self")}
                 >
@@ -277,22 +277,22 @@ export default function Contact() {
             {/* Jiriba Soft Credits */}
             <Card className="bg-blue-50 border-blue-200">
               <CardHeader>
-            <CardTitle className="text-xl text-primary">Platform Support</CardTitle>
-            <CardDescription className="text-muted-foreground">
+                <CardTitle className="text-xl text-primary">Platform Support</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Technical support and development
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">JS</span>
-              </div>
-              <div>
-                <p className="font-semibold text-primary">Jiriba Soft</p>
-                <p className="text-sm text-emerald-700">contact@jiribasoft.com</p>
-                <p className="text-xs text-muted-foreground">Platform development & technical support</p>
-              </div>
-            </div>
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">DS</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-primary">Devspace Systems</p>
+                    <p className="text-sm text-emerald-700">info@devspacesystems.com</p>
+                    <p className="text-xs text-muted-foreground">Platform development & technical support</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

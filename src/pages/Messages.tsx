@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,17 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  MessageSquare, 
-  Send, 
-  Search, 
-  Plus, 
-  User, 
-  ChevronLeft, 
-  Menu, 
-  MoreVertical, 
-  Image, 
-  Video, 
+import {
+  MessageSquare,
+  Send,
+  Search,
+  Plus,
+  User,
+  ChevronLeft,
+  Menu,
+  MoreVertical,
+  Image,
+  Video,
   Paperclip,
   X,
   Smile,
@@ -55,15 +55,15 @@ type Conversation = {
 };
 
 // Media Gallery Component (keep as is)
-const MediaGallery = ({ 
-  media, 
-  isOpen, 
-  onClose, 
-  initialIndex = 0 
-}: { 
-  media: string[]; 
-  isOpen: boolean; 
-  onClose: () => void; 
+const MediaGallery = ({
+  media,
+  isOpen,
+  onClose,
+  initialIndex = 0
+}: {
+  media: string[];
+  isOpen: boolean;
+  onClose: () => void;
   initialIndex?: number;
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -105,9 +105,9 @@ const MediaGallery = ({
         <div className="text-lg font-medium">
           {currentIndex + 1} of {media.length}
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-white"
         >
@@ -119,16 +119,16 @@ const MediaGallery = ({
       <div className="flex-1 relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center">
           {isVideo ? (
-            <video 
-              src={currentMedia} 
-              controls 
+            <video
+              src={currentMedia}
+              controls
               autoPlay
               className="max-h-full max-w-full object-contain"
             />
           ) : (
-            <img 
-              src={currentMedia} 
-              alt={`Media ${currentIndex + 1}`} 
+            <img
+              src={currentMedia}
+              alt={`Media ${currentIndex + 1}`}
               className="max-h-full max-w-full object-contain"
             />
           )}
@@ -194,31 +194,26 @@ function useVerificationStatus() {
   const checkVerificationStatus = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         setIsVerified(false);
         setLoading(false);
         return;
       }
 
-      // Check email confirmation first
-      if (user.email_confirmed_at) {
-        setIsVerified(true);
-        setLoading(false);
-        return;
-      }
-
-      // Fallback to profiles table
+      // Check profiles table for verification status
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('is_verified')
+        .eq('id', user.id)
         .single();
 
       if (error) {
-        console.log("Profile not found or user not verified");
+        console.error("Error fetching profile:", error);
         setIsVerified(false);
       } else {
         setIsVerified(profile?.is_verified || false);
+        console.log('User verification status:', profile?.is_verified);
       }
     } catch (error) {
       console.error("Error checking verification:", error);
@@ -230,7 +225,7 @@ function useVerificationStatus() {
 
   useEffect(() => {
     checkVerificationStatus();
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
@@ -270,13 +265,13 @@ const AdminApprovalRequired = () => {
                   What's happening?
                 </p>
                 <p className="text-sm text-blue-700">
-                  Your account is currently under review by our administration team. 
+                  Your account is currently under review by our administration team.
                   You'll be able to access all features once your account is approved.
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="text-center text-sm text-gray-600">
             <p>Please check back later or contact support if this takes longer than expected.</p>
           </div>
@@ -309,18 +304,25 @@ export default function Messages() {
   const [initialMediaIndex, setInitialMediaIndex] = useState(0);
   const [connectionError, setConnectionError] = useState(false);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
-  
+
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setNewMessage(prev => prev + emojiData.emoji);
   };
+
+  // Track active conversation with a ref to avoid subscription recreation
+  const activeConversationRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
 
   // Only setup messaging features if user is verified
   useEffect(() => {
     if (user && isVerified === true) {
       fetchConversations();
       fetchContacts();
-      
+
       const channel = setupRealtimeSubscription();
 
       return () => {
@@ -335,7 +337,7 @@ export default function Messages() {
       // If user is not verified, set loading to false to show the empty state
       setLoading(false);
     }
-  }, [user, isVerified, activeConversation]);
+  }, [user, isVerified]); // Removed activeConversation from dependencies
 
   // Function to set up real-time subscription with error handling
   const setupRealtimeSubscription = () => {
@@ -363,8 +365,9 @@ export default function Messages() {
             ) {
               console.log('Real-time update:', payload);
               fetchConversations();
-              if (activeConversation) {
-                fetchConversationMessages(activeConversation);
+              // Use ref to get current active conversation
+              if (activeConversationRef.current) {
+                fetchConversationMessages(activeConversationRef.current);
               }
             }
           }
@@ -377,8 +380,10 @@ export default function Messages() {
               clearInterval(pollingInterval);
               setPollingInterval(null);
             }
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.warn('WebSocket failed, switching to polling mode');
             setConnectionError(true);
+            startPolling();
           }
         });
 
@@ -386,9 +391,30 @@ export default function Messages() {
     } catch (error) {
       console.error('WebSocket setup failed:', error);
       setConnectionError(true);
+      startPolling();
       return null;
     }
   };
+
+  // Fallback polling when WebSocket fails
+  const startPolling = useCallback(() => {
+    // Clear any existing interval first
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+    }
+
+    console.log('Starting polling mode for messages');
+    const interval = setInterval(() => {
+      if (user && isVerified === true) {
+        fetchConversations();
+        if (activeConversationRef.current) {
+          fetchConversationMessages(activeConversationRef.current);
+        }
+      }
+    }, 5000); // Poll every 5 seconds
+
+    setPollingInterval(interval);
+  }, [user, isVerified, pollingInterval]);
 
   useEffect(() => {
     scrollToBottom();
@@ -415,7 +441,7 @@ export default function Messages() {
     } else {
       return date.toLocaleDateString("en-GB", {
         day: "numeric",
-        month: "short", 
+        month: "short",
         year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined
       });
     }
@@ -434,7 +460,7 @@ export default function Messages() {
 
     try {
       setLoading(true);
-      
+
       const { data: conversationsData, error: conversationsError } = await supabase
         .from("messages")
         .select("sender_id, recipient_id")
@@ -446,10 +472,13 @@ export default function Messages() {
       }
 
       if (!conversationsData || conversationsData.length === 0) {
+        console.log('No conversations found');
         setConversations([]);
         setLoading(false);
         return;
       }
+
+      console.log('Found', conversationsData.length, 'message records');
 
       const contactIds = new Set<string>();
       conversationsData.forEach(msg => {
@@ -458,6 +487,7 @@ export default function Messages() {
       });
 
       const uniqueContactIds: string[] = Array.from(contactIds);
+      console.log('Unique contacts:', uniqueContactIds.length);
 
       if (uniqueContactIds.length === 0) {
         setConversations([]);
@@ -475,6 +505,9 @@ export default function Messages() {
         console.error('Error fetching profiles:', profilesError);
         throw profilesError;
       }
+
+      console.log('Fetched profiles:', profilesData?.length, 'profiles');
+      console.log('Profile details:', profilesData);
 
       const conversationPromises = uniqueContactIds.map(async (contactId) => {
         const { data: lastMessage, error: messageError } = await supabase
@@ -515,13 +548,14 @@ export default function Messages() {
 
       const conversationResults = await Promise.all(conversationPromises);
       const validConversations = conversationResults.filter(conv => conv !== null) as Conversation[];
-      
+
       validConversations.sort((a, b) => {
         const dateA = a.lastMessage ? new Date(a.lastMessage.created_at).getTime() : 0;
         const dateB = b.lastMessage ? new Date(b.lastMessage.created_at).getTime() : 0;
         return dateB - dateA;
       });
 
+      console.log('Setting', validConversations.length, 'conversations');
       setConversations(validConversations);
     } catch (error) {
       console.error('Error in fetchConversations:', error);
@@ -537,7 +571,7 @@ export default function Messages() {
 
   const fetchContacts = async () => {
     if (isVerified !== true) return;
-    
+
     try {
       // Let RLS handle the verification filtering - just fetch all available contacts
       const { data, error } = await supabase
@@ -568,6 +602,7 @@ export default function Messages() {
   const fetchConversationMessages = async (contactId: string) => {
     if (!user || isVerified !== true) return;
 
+    console.log('Fetching messages for conversation with:', contactId);
     try {
       const { data, error } = await supabase
         .from("messages")
@@ -578,18 +613,24 @@ export default function Messages() {
         .or(`and(sender_id.eq.${user.id},recipient_id.eq.${contactId}),and(sender_id.eq.${contactId},recipient_id.eq.${user.id})`)
         .order("created_at", { ascending: true });
 
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      console.log('Fetched messages:', data?.length, 'messages');
       if (data && !error) {
         setConversationMessages(data as ConversationMessage[]);
-        
+
         await supabase
           .from("messages")
           .update({ read_at: new Date().toISOString() })
           .eq("sender_id", contactId)
           .eq("recipient_id", user.id)
           .is("read_at", null);
-          
-        setConversations(prev => prev.map(conv => 
-          conv.contact.id === contactId ? {...conv, unreadCount: 0} : conv
+
+        setConversations(prev => prev.map(conv =>
+          conv.contact.id === contactId ? { ...conv, unreadCount: 0 } : conv
         ));
       }
     } catch (error) {
@@ -602,7 +643,7 @@ export default function Messages() {
     if (!files || files.length === 0) return;
 
     const newFiles = Array.from(files);
-    
+
     const validFiles = newFiles.filter(file => {
       if (type === 'image') {
         return file.type.startsWith('image/');
@@ -659,9 +700,10 @@ export default function Messages() {
     }
 
     setSending(true);
+    console.log('Sending message to:', activeConversation);
     try {
       let imageUrls: string[] = [];
-      
+
       if (selectedMessageImages.length > 0) {
         try {
           for (const image of selectedMessageImages) {
@@ -695,17 +737,23 @@ export default function Messages() {
         }
       }
 
-      const { error } = await supabase
+      const messageData = {
+        sender_id: user.id,
+        recipient_id: activeConversation,
+        content: newMessage.trim(),
+        images: imageUrls.length > 0 ? JSON.stringify(imageUrls) : null,
+        subject: null
+      };
+
+      console.log('Inserting message:', messageData);
+
+      const { data, error } = await supabase
         .from("messages")
-        .insert({
-          sender_id: user.id,
-          recipient_id: activeConversation,
-          content: newMessage.trim(),
-          images: imageUrls.length > 0 ? JSON.stringify(imageUrls) : null,
-          subject: null
-        });
+        .insert(messageData)
+        .select();
 
       if (error) {
+        console.error('Message insert error:', error);
         if (error.code === '42501') {
           toast({
             title: "Account Not Approved",
@@ -717,6 +765,7 @@ export default function Messages() {
         throw error;
       }
 
+      console.log('Message sent successfully:', data);
       setNewMessage("");
       setSelectedMessageImages([]);
       fetchConversationMessages(activeConversation);
@@ -725,8 +774,9 @@ export default function Messages() {
         title: "Message Sent",
         description: "Your message has been sent successfully.",
       });
-      
+
     } catch (error) {
+      console.error('Send message error:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -814,7 +864,7 @@ export default function Messages() {
   // Return the main messaging interface for verified users
   return (
     <div className="min-h-screen bg-gray-50">
-      
+
 
       <div className="h-screen flex flex-col md:flex-row">
         {/* Left Panel - Conversations */}
@@ -843,7 +893,7 @@ export default function Messages() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -910,7 +960,7 @@ export default function Messages() {
                   <div className="text-center py-8 text-gray-500">
                     <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No conversations yet</p>
-                    <Button 
+                    <Button
                       onClick={() => setShowNewChat(true)}
                       className="mt-2 bg-green-600 hover:bg-green-700"
                     >
@@ -921,9 +971,8 @@ export default function Messages() {
                   filteredConversations.map((conversation) => (
                     <div
                       key={conversation.contact.id}
-                      className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                        activeConversation === conversation.contact.id ? 'bg-green-50' : ''
-                      }`}
+                      className={`p-4 hover:bg-gray-50 cursor-pointer ${activeConversation === conversation.contact.id ? 'bg-green-50' : ''
+                        }`}
                       onClick={() => {
                         setActiveConversation(conversation.contact.id);
                         fetchConversationMessages(conversation.contact.id);
@@ -990,7 +1039,7 @@ export default function Messages() {
                 </Button>
                 {(() => {
                   const contact = conversations.find(c => c.contact.id === activeConversation)?.contact ||
-                                contacts.find(c => c.id === activeConversation);
+                    contacts.find(c => c.id === activeConversation);
                   return contact ? (
                     <div className="flex items-center space-x-3 flex-1">
                       <Avatar className="w-8 h-8 border border-white">
@@ -1022,12 +1071,18 @@ export default function Messages() {
                 <div className="space-y-2">
                   {conversationMessages.map((message, index) => {
                     const isFromMe = message.sender_id === user.id;
-                    const showDate = index === 0 || 
-                      formatMessageDate(message.created_at) !== 
+                    const showDate = index === 0 ||
+                      formatMessageDate(message.created_at) !==
                       formatMessageDate(conversationMessages[index - 1].created_at);
-                    
-                    const messageImages = message.images ? JSON.parse(message.images) : [];
-                    
+
+                    let messageImages: string[] = [];
+                    try {
+                      messageImages = message.images ? JSON.parse(message.images) : [];
+                    } catch (error) {
+                      console.error('Error parsing message images:', error);
+                      messageImages = [];
+                    }
+
                     return (
                       <div key={message.id}>
                         {showDate && (
@@ -1039,24 +1094,23 @@ export default function Messages() {
                         )}
                         <div className={`flex ${isFromMe ? 'justify-end' : 'justify-start'}`}>
                           <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              isFromMe
-                                ? 'bg-green-100 text-gray-900'
-                                : 'bg-white text-gray-900 shadow-sm'
-                            }`}
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isFromMe
+                              ? 'bg-green-100 text-gray-900'
+                              : 'bg-white text-gray-900 shadow-sm'
+                              }`}
                           >
                             {messageImages.length > 0 && (
                               <div className={`mb-2 grid gap-1 ${messageImages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                                 {messageImages.slice(0, 4).map((img: string, idx: number) => (
-                                  <div 
-                                    key={idx} 
+                                  <div
+                                    key={idx}
                                     className={`relative cursor-pointer ${messageImages.length > 1 && idx === 3 ? 'bg-black/40' : ''}`}
                                     onClick={() => openMediaGallery(messageImages, idx)}
                                   >
                                     {img.endsWith('.mp4') || img.endsWith('.mov') || img.endsWith('.webm') ? (
                                       <div className="relative">
-                                        <video 
-                                          src={img} 
+                                        <video
+                                          src={img}
                                           className="w-full h-auto rounded-md"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center">
@@ -1064,9 +1118,9 @@ export default function Messages() {
                                         </div>
                                       </div>
                                     ) : (
-                                      <img 
-                                        src={img} 
-                                        alt={`Attachment ${idx + 1}`} 
+                                      <img
+                                        src={img}
+                                        alt={`Attachment ${idx + 1}`}
                                         className="w-full h-auto rounded-md"
                                       />
                                     )}
@@ -1081,13 +1135,12 @@ export default function Messages() {
                                 ))}
                               </div>
                             )}
-                            
+
                             {message.content && (
                               <p className="text-sm">{message.content}</p>
                             )}
-                            <p className={`text-xs mt-1 text-right ${
-                              isFromMe ? 'text-gray-500' : 'text-gray-400'
-                            }`}>
+                            <p className={`text-xs mt-1 text-right ${isFromMe ? 'text-gray-500' : 'text-gray-400'
+                              }`}>
                               {formatTime(message.created_at)}
                             </p>
                           </div>
@@ -1205,7 +1258,7 @@ export default function Messages() {
                       }}
                       className="rounded-full pr-10"
                     />
-                    
+
                     {showEmojiPicker && (
                       <div className="absolute bottom-12 right--1 z-20">
                         <EmojiPicker
@@ -1260,10 +1313,10 @@ export default function Messages() {
       </div>
 
       {/* Media Gallery Modal */}
-      <MediaGallery 
-        media={selectedMedia} 
-        isOpen={mediaGalleryOpen} 
-        onClose={() => setMediaGalleryOpen(false)} 
+      <MediaGallery
+        media={selectedMedia}
+        isOpen={mediaGalleryOpen}
+        onClose={() => setMediaGalleryOpen(false)}
         initialIndex={initialMediaIndex}
       />
     </div>

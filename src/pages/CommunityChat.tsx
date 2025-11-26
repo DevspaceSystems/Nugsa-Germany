@@ -51,7 +51,7 @@ export default function CommunityChat() {
   const fetchMessages = async () => {
     try {
       const { data, error } = await supabase
-        .from("messages")
+        .from("community_messages")
         .select(`
           id,
           content,
@@ -64,7 +64,6 @@ export default function CommunityChat() {
             role
           )
         `)
-        .eq("recipient_id", "community")
         .order("created_at", { ascending: true })
         .limit(100);
 
@@ -86,8 +85,7 @@ export default function CommunityChat() {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'messages',
-          filter: 'recipient_id=eq.community'
+          table: 'community_messages'
         },
         (payload) => {
           fetchMessages(); // Refetch to get sender details
@@ -107,11 +105,10 @@ export default function CommunityChat() {
     setSending(true);
     try {
       const { error } = await supabase
-        .from("messages")
+        .from("community_messages")
         .insert({
           content: newMessage.trim(),
-          sender_id: user.id,
-          recipient_id: "community",
+          sender_id: user.id
         });
 
       if (error) throw error;
@@ -210,7 +207,7 @@ export default function CommunityChat() {
                               {isOwnMessage ? 'You' : `${message.sender?.first_name} ${message.sender?.last_name}`}
                             </span>
                             {message.sender?.role === 'admin' && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                                 Admin
                               </span>
                             )}
@@ -219,11 +216,10 @@ export default function CommunityChat() {
                             </span>
                           </div>
                           <div
-                            className={`rounded-lg px-3 py-2 max-w-full break-words ${
-                              isOwnMessage
-                          ? 'bg-primary text-white'
-                                : 'bg-gray-100 text-gray-900'
-                            }`}
+                            className={`rounded-lg px-3 py-2 max-w-full break-words ${isOwnMessage
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 text-gray-900'
+                              }`}
                           >
                             {message.content}
                           </div>

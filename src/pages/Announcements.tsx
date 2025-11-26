@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,8 @@ type MediaItem = {
   type: 'image' | 'video';
 };
 
-// Facebook-like media gallery component
-const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) => {
+// Facebook-like media gallery component - Memoized for performance
+const MediaGallery = memo(({ media, title }: { media: MediaItem[]; title: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,25 +25,25 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
 
   const currentMedia = media[currentIndex];
 
-  const nextMedia = () => {
+  const nextMedia = useCallback(() => {
     // Pause current video if playing
     if (currentMedia.type === 'video' && videoRefs.current[currentIndex]) {
       videoRefs.current[currentIndex]?.pause();
     }
     setCurrentIndex((prev) => (prev + 1) % media.length);
     setIsPlaying(false);
-  };
+  }, [currentIndex, currentMedia.type, media.length]);
 
-  const prevMedia = () => {
+  const prevMedia = useCallback(() => {
     // Pause current video if playing
     if (currentMedia.type === 'video' && videoRefs.current[currentIndex]) {
       videoRefs.current[currentIndex]?.pause();
     }
     setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
     setIsPlaying(false);
-  };
+  }, [currentIndex, currentMedia.type, media.length]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (currentMedia.type === 'video' && videoRefs.current[currentIndex]) {
       const video = videoRefs.current[currentIndex];
       if (video) {
@@ -56,9 +56,9 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
         }
       }
     }
-  };
+  }, [currentIndex, currentMedia.type]);
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     if (currentMedia.type === 'video' && videoRefs.current[currentIndex]) {
       const video = videoRefs.current[currentIndex];
       if (video) {
@@ -66,37 +66,38 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
         setIsMuted(video.muted);
       }
     }
-  };
+  }, [currentIndex, currentMedia.type]);
 
-  const handleVideoEnd = () => {
+  const handleVideoEnd = useCallback(() => {
     setIsPlaying(false);
-  };
+  }, []);
 
-  const handleVideoPlay = () => {
+  const handleVideoPlay = useCallback(() => {
     setIsPlaying(true);
-  };
+  }, []);
 
-  const handleVideoPause = () => {
+  const handleVideoPause = useCallback(() => {
     setIsPlaying(false);
-  };
+  }, []);
 
   if (media.length === 0) return null;
 
   return (
-    <div className="relative bg-black rounded-lg overflow-hidden">
-      {/* Fixed size container - Facebook post like */}
-      <div className="w-full h-96 bg-black flex items-center justify-center relative">
+    <div className="relative bg-black overflow-hidden">
+      {/* Aspect ratio container */}
+      <div className="w-full aspect-video bg-black flex items-center justify-center relative">
         {currentMedia.type === 'image' ? (
           <img
             src={currentMedia.url}
             alt={`${title} - Image ${currentIndex + 1}`}
-            className="max-w-full max-h-full object-contain"
+            className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <video
-            ref={el => videoRefs.current[currentIndex] = el}
+            ref={el => { videoRefs.current[currentIndex] = el; }}
             src={currentMedia.url}
-            className="max-w-full max-h-full object-contain"
+            className="w-full h-full object-cover"
             muted={isMuted}
             onEnded={handleVideoEnd}
             onPlay={handleVideoPlay}
@@ -104,7 +105,7 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
             playsInline
           />
         )}
-        
+
         {/* Video controls */}
         {currentMedia.type === 'video' && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -133,7 +134,7 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
 
         {/* Play button overlay for videos */}
         {currentMedia.type === 'video' && !isPlaying && (
-          <div 
+          <div
             className="absolute inset-0 flex items-center justify-center cursor-pointer"
             onClick={togglePlayPause}
           >
@@ -142,7 +143,7 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
             </div>
           </div>
         )}
-        
+
         {/* Navigation buttons */}
         {media.length > 1 && (
           <>
@@ -164,7 +165,7 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
             </Button>
           </>
         )}
-        
+
         {/* Media counter */}
         {media.length > 1 && (
           <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
@@ -183,7 +184,7 @@ const MediaGallery = ({ media, title }: { media: MediaItem[]; title: string }) =
       </div>
     </div>
   );
-};
+});
 
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -238,11 +239,11 @@ export default function Announcements() {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      scholarships: "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200",
-      jobs: "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200",
-      sports: "bg-gradient-to-r from-rose-100 to-orange-100 text-rose-700 border-rose-200",
-      events: "bg-gradient-to-r from-slate-100 to-stone-100 text-slate-700 border-slate-200",
-      general: "bg-gradient-to-r from-gray-100 to-zinc-100 text-gray-800 border-gray-200"
+      scholarships: "bg-green-100 text-green-800 border-green-200",
+      jobs: "bg-blue-100 text-blue-800 border-blue-200",
+      sports: "bg-orange-100 text-orange-800 border-orange-200",
+      events: "bg-purple-100 text-purple-800 border-purple-200",
+      general: "bg-gray-100 text-gray-800 border-gray-200"
     };
     return colors[category as keyof typeof colors] || colors.general;
   };
@@ -284,7 +285,7 @@ export default function Announcements() {
 
   const getAnnouncementMedia = (announcement: Announcement): MediaItem[] => {
     if (!announcement.image_url) return [];
-    
+
     try {
       const mediaUrls = JSON.parse(announcement.image_url);
       if (Array.isArray(mediaUrls)) {
@@ -296,7 +297,7 @@ export default function Announcements() {
     } catch {
       // Single media (legacy)
     }
-    
+
     const url = announcement.image_url;
     return [{
       url,
@@ -326,12 +327,12 @@ export default function Announcements() {
   const nextDialogMedia = () => {
     if (!selectedAnnouncement) return;
     const media = getAnnouncementMedia(selectedAnnouncement);
-    
+
     // Pause current video if playing
     if (dialogVideoRef.current) {
       dialogVideoRef.current.pause();
     }
-    
+
     setDialogMediaIndex((prev) => (prev + 1) % media.length);
     setIsDialogPlaying(false);
   };
@@ -339,12 +340,12 @@ export default function Announcements() {
   const prevDialogMedia = () => {
     if (!selectedAnnouncement) return;
     const media = getAnnouncementMedia(selectedAnnouncement);
-    
+
     // Pause current video if playing
     if (dialogVideoRef.current) {
       dialogVideoRef.current.pause();
     }
-    
+
     setDialogMediaIndex((prev) => (prev - 1 + media.length) % media.length);
     setIsDialogPlaying(false);
   };
@@ -397,26 +398,26 @@ export default function Announcements() {
   const regularAnnouncements = filteredAnnouncements.filter(a => !a.featured);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
-            <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
-              <Bell className="w-12 h-12 text-white" />
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-primary rounded-full">
+              <Bell className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-3xl font-bold text-primary mb-2">
             News & Announcements
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base text-muted-foreground max-w-2xl mx-auto">
             Stay updated with the latest news, opportunities, and events from the NUGSA-Germany community
           </p>
         </div>
 
         {/* Search and Filter Controls */}
-        <Card className="mb-8 border-0 shadow-lg bg-white/80 backdrop-blur">
-          <CardContent className="pt-6">
+        <Card className="mb-6 border shadow-sm">
+          <CardContent className="pt-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -448,34 +449,34 @@ export default function Announcements() {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-blue-600">{filteredAnnouncements.length}</div>
-              <div className="text-sm text-muted-foreground">Total Posts</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <Card className="border shadow-sm">
+            <CardContent className="p-3 text-center">
+              <TrendingUp className="w-6 h-6 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-primary">{filteredAnnouncements.length}</div>
+              <div className="text-xs text-muted-foreground">Total Posts</div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-yellow-600">{featuredAnnouncements.length}</div>
-              <div className="text-sm text-muted-foreground">Featured</div>
+          <Card className="border shadow-sm">
+            <CardContent className="p-3 text-center">
+              <Star className="w-6 h-6 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-primary">{featuredAnnouncements.length}</div>
+              <div className="text-xs text-muted-foreground">Featured</div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <Tag className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-600">
+          <Card className="border shadow-sm">
+            <CardContent className="p-3 text-center">
+              <Tag className="w-6 h-6 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-primary">
                 {new Set(announcements.map(a => a.category)).size}
               </div>
-              <div className="text-sm text-muted-foreground">Categories</div>
+              <div className="text-xs text-muted-foreground">Categories</div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <Clock className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-purple-600">
+          <Card className="border shadow-sm">
+            <CardContent className="p-3 text-center">
+              <Clock className="w-6 h-6 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-primary">
                 {announcements.filter(a => {
                   const date = new Date(a.created_at || "");
                   const now = new Date();
@@ -483,83 +484,62 @@ export default function Announcements() {
                   return diffInDays <= 7;
                 }).length}
               </div>
-              <div className="text-sm text-muted-foreground">This Week</div>
+              <div className="text-xs text-muted-foreground">This Week</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Featured Announcements */}
         {featuredAnnouncements.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-primary mb-6 flex items-center">
-              <Star className="w-6 h-6 mr-2" />
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+              <Star className="w-5 h-5 mr-2" />
               Featured Announcements
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {featuredAnnouncements.map((announcement) => {
                 const media = getAnnouncementMedia(announcement);
-                
+
                 return (
-                  <Card 
-                    key={announcement.id} 
-                    className="group border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur overflow-hidden cursor-pointer"
+                  <Card
+                    key={announcement.id}
+                    className="group overflow-hidden hover:shadow-lg transition-all cursor-pointer border rounded-lg"
                     onClick={() => handleAnnouncementClick(announcement)}
                   >
-                    <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-bl-lg">
-                      <Star className="w-3 h-3 inline mr-1" />
-                      Featured
-                    </div>
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <Badge className={`${getCategoryColor(announcement.category)} border`}>
-                          {getCategoryIcon(announcement.category)} {announcement.category.charAt(0).toUpperCase() + announcement.category.slice(1)}
-                        </Badge>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {formatDate(announcement.created_at || "")}
+                    {/* Image */}
+                    {media.length > 0 && (
+                      <div className="relative">
+                        <MediaGallery media={media} title={announcement.title} />
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-primary text-white border-0 text-xs">
+                            <Star className="w-2 h-2 inline mr-1" />
+                            Featured
+                          </Badge>
                         </div>
                       </div>
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    )}
+
+                    <CardContent className="p-4">
+                      {/* Category Badge */}
+                      <Badge className={`${getCategoryColor(announcement.category)} border text-xs mb-2`}>
+                        {getCategoryIcon(announcement.category)} {announcement.category.charAt(0).toUpperCase() + announcement.category.slice(1)}
+                      </Badge>
+
+                      {/* Title */}
+                      <h3 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                         {announcement.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {media.length > 0 && (
-                        <div className="mb-6">
-                          <MediaGallery media={media} title={announcement.title} />
-                        </div>
-                      )}
-                      <div className="prose prose-sm max-w-none">
-                        <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                          {announcement.content.length > 300 
-                            ? `${announcement.content.substring(0, 300)}...` 
-                            : announcement.content}
-                        </p>
+                      </h3>
+
+                      {/* Content */}
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {announcement.content}
+                      </p>
+
+                      {/* Date */}
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {formatDate(announcement.created_at || "")}
                       </div>
-                      
-                      {announcement.content.length > 300 && (
-                        <div className="mt-4">
-                          <Button variant="outline" className="w-full">
-                            Click to read more
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {announcement.category === "scholarships" && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                          <p className="text-sm text-green-800 font-medium flex items-center">
-                            💡 <span className="ml-1">Tip: Check eligibility requirements and deadlines before applying.</span>
-                          </p>
-                        </div>
-                      )}
-                      
-                      {announcement.category === "jobs" && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
-                          <p className="text-sm text-blue-800 font-medium flex items-center">
-                            💼 <span className="ml-1">Remember to update your resume and prepare for the application process.</span>
-                          </p>
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 );
@@ -570,72 +550,45 @@ export default function Announcements() {
 
         {/* Regular Announcements */}
         <section>
-          <h2 className="text-2xl font-bold text-primary mb-6">All Announcements</h2>
-          <div className="space-y-6">
+          <h2 className="text-xl font-bold text-primary mb-4">All Announcements</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {regularAnnouncements.map((announcement) => {
               const media = getAnnouncementMedia(announcement);
-              
+
               return (
-                <Card 
-                  key={announcement.id} 
-                  className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white/90 backdrop-blur cursor-pointer"
+                <Card
+                  key={announcement.id}
+                  className="group overflow-hidden hover:shadow-lg transition-all cursor-pointer border rounded-lg"
                   onClick={() => handleAnnouncementClick(announcement)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <Badge className={`${getCategoryColor(announcement.category)} border`}>
-                            {getCategoryIcon(announcement.category)} {announcement.category.charAt(0).toUpperCase() + announcement.category.slice(1)}
-                          </Badge>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4 mr-1" />
-                            {formatDate(announcement.created_at || "")}
-                          </div>
-                        </div>
-                        <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">
-                          {announcement.title}
-                        </CardTitle>
-                      </div>
+                  {/* Image */}
+                  {media.length > 0 && (
+                    <div className="relative">
+                      <MediaGallery media={media} title={announcement.title} />
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    {media.length > 0 && (
-                      <div className="mb-4">
-                        <MediaGallery media={media} title={announcement.title} />
-                      </div>
-                    )}
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                        {announcement.content.length > 300 
-                          ? `${announcement.content.substring(0, 300)}...` 
-                          : announcement.content}
-                      </p>
+                  )}
+
+                  <CardContent className="p-4">
+                    {/* Category Badge */}
+                    <Badge className={`${getCategoryColor(announcement.category)} border text-xs mb-2`}>
+                      {getCategoryIcon(announcement.category)} {announcement.category.charAt(0).toUpperCase() + announcement.category.slice(1)}
+                    </Badge>
+
+                    {/* Title */}
+                    <h3 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                      {announcement.title}
+                    </h3>
+
+                    {/* Content */}
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      {announcement.content}
+                    </p>
+
+                    {/* Date */}
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {formatDate(announcement.created_at || "")}
                     </div>
-                    
-                    {announcement.content.length > 300 && (
-                      <div className="mt-4">
-                        <Button variant="outline" className="w-full">
-                          Click to read more
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {announcement.category === "scholarships" && (
-                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-800 font-medium flex items-center">
-                          💡 <span className="ml-1">Tip: Make sure to check eligibility requirements and deadlines before applying.</span>
-                        </p>
-                      </div>
-                    )}
-                    
-                    {announcement.category === "jobs" && (
-                      <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800 font-medium flex items-center">
-                          💼 <span className="ml-1">Remember to update your resume and prepare for the application process.</span>
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -695,15 +648,15 @@ export default function Announcements() {
               </Button>
             </div>
           </DialogHeader>
-          
+
           <DialogDescription asChild>
             <div>
               {selectedAnnouncement && (() => {
                 const media = getAnnouncementMedia(selectedAnnouncement);
                 if (media.length === 0) return null;
-                
+
                 const currentMedia = media[dialogMediaIndex];
-                
+
                 return (
                   <div className="mb-6 relative bg-black rounded-lg overflow-hidden">
                     <div className="w-full h-96 bg-black flex items-center justify-center relative">
@@ -725,7 +678,7 @@ export default function Announcements() {
                           playsInline
                         />
                       )}
-                      
+
                       {/* Video controls */}
                       {currentMedia.type === 'video' && (
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -754,7 +707,7 @@ export default function Announcements() {
 
                       {/* Play button overlay for videos */}
                       {currentMedia.type === 'video' && !isDialogPlaying && (
-                        <div 
+                        <div
                           className="absolute inset-0 flex items-center justify-center cursor-pointer"
                           onClick={toggleDialogPlayPause}
                         >
@@ -763,7 +716,7 @@ export default function Announcements() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Navigation buttons */}
                       {media.length > 1 && (
                         <>
@@ -785,7 +738,7 @@ export default function Announcements() {
                           </Button>
                         </>
                       )}
-                      
+
                       {/* Media counter */}
                       {media.length > 1 && (
                         <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
@@ -805,13 +758,13 @@ export default function Announcements() {
                   </div>
                 );
               })()}
-              
+
               <div className="prose prose-lg max-w-none">
                 <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                   {selectedAnnouncement?.content}
                 </p>
               </div>
-              
+
               {selectedAnnouncement?.category === "scholarships" && (
                 <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-800 font-medium flex items-center">
@@ -819,7 +772,7 @@ export default function Announcements() {
                   </p>
                 </div>
               )}
-              
+
               {selectedAnnouncement?.category === "jobs" && (
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg">
                   <p className="text-sm text-amber-800 font-medium flex items-center">

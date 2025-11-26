@@ -6,6 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface HeroImage {
+  id: string;
+  title: string;
+  image_url: string;
+  is_active: boolean;
+  order_priority: number;
+}
+
 export default function Home() {
   const { user } = useAuth();
   const [stats, setStats] = useState({
@@ -13,47 +21,76 @@ export default function Home() {
     germanStates: 0,
     universities: 0
   });
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchPublicStats();
+    fetchHeroImages();
   }, []);
 
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
+  const fetchHeroImages = async () => {
+    try {
+      const { data } = await supabase
+        .from("hero_images" as any)
+        .select("*")
+        .eq("is_active", true)
+        .order("order_priority", { ascending: true });
+
+      if (data) {
+        setHeroImages(data as unknown as HeroImage[]);
+      }
+    } catch (error) {
+      console.error("Error fetching hero images:", error);
+    }
+  };
+
   const fetchPublicStats = async () => {
-  try {
-    const { count: activeStudents } = await supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("is_verified", true);
+    try {
+      const { count: activeStudents } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("is_verified", true);
 
-    const { data: statesData } = await supabase
-      .from("profiles")
-      .select("india_state")
-      .eq("is_verified", true)
-      .not("india_state", "is", null);
+      const { data: statesData } = await supabase
+        .from("profiles")
+        .select("india_state")
+        .eq("is_verified", true)
+        .not("india_state", "is", null);
 
-    const uniqueStates = new Set(
+      const uniqueStates = new Set(
         statesData?.map(item => item.india_state?.trim().toLowerCase()).filter(Boolean)
-    );
+      );
 
-    const { data: universitiesData } = await supabase
-      .from("profiles")
-      .select("university")
-      .eq("is_verified", true)
-      .not("university", "is", null);
+      const { data: universitiesData } = await supabase
+        .from("profiles")
+        .select("university")
+        .eq("is_verified", true)
+        .not("university", "is", null);
 
-    const uniqueUniversities = new Set(
+      const uniqueUniversities = new Set(
         universitiesData?.map(item => item.university?.trim().toLowerCase()).filter(Boolean)
-    );
+      );
 
-    setStats({
-      activeStudents: activeStudents || 0,
-      germanStates: uniqueStates.size,
-      universities: uniqueUniversities.size
-    });
-  } catch (error) {
+      setStats({
+        activeStudents: activeStudents || 0,
+        germanStates: uniqueStates.size,
+        universities: uniqueUniversities.size
+      });
+    } catch (error) {
       console.error("Error fetching public stats:", error);
-  }
-};
+    }
+  };
 
   const features = [
     {
@@ -108,26 +145,41 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative hero-background text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
-        
-        <div className="relative section-container section-padding">
+      <section className="relative h-[600px] flex items-center justify-center text-white overflow-hidden">
+        {/* Background Images */}
+        {heroImages.length > 0 ? (
+          heroImages.map((image, index) => (
+            <div
+              key={image.id}
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                }`}
+              style={{ backgroundImage: `url(${image.image_url})` }}
+            />
+          ))
+        ) : (
+          <div className="absolute inset-0 hero-background bg-cover bg-center" />
+        )}
+
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10"></div>
+
+        <div className="relative z-20 section-container section-padding">
           <div className="max-w-4xl mx-auto text-center fade-in">
             <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 border border-white/20">
               <Award className="w-4 h-4" />
               <span className="text-sm font-medium">Official Student Association</span>
             </div>
-            
+
             <h1 className="heading-1 text-white mb-6 leading-tight">
               Welcome to NUGSA-Germany
             </h1>
-            
+
             <p className="body-large text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              The National Union of Ghanaian Student Associations in Germany. 
+              The National Union of Ghanaian Student Associations in Germany.
               Empowering students through community, support, and excellence.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               {user ? (
                 <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
@@ -139,36 +191,36 @@ export default function Home() {
               ) : (
                 <>
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
-                <Link to="/auth">
-                  Join Our Community
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
+                    <Link to="/auth">
+                      Join Our Community
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
+                  </Button>
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
-                <Link to="/about">Learn More</Link>
-              </Button>
+                    <Link to="/about">Learn More</Link>
+                  </Button>
                 </>
               )}
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Stats Bar */}
-        <div className="relative border-t border-white/20 bg-white/5 backdrop-blur-sm">
-          <div className="section-container py-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {statsData.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <stat.icon className="w-5 h-5 text-secondary mr-2" />
-                    <div className="text-3xl md:text-4xl font-bold text-white">
-                      {stat.number}
-                    </div>
+      {/* Stats Bar */}
+      <section className="bg-primary/95 text-white border-t border-primary-foreground/10">
+        <div className="section-container py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {statsData.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <stat.icon className="w-5 h-5 text-secondary mr-2" />
+                  <div className="text-3xl md:text-4xl font-bold text-white">
+                    {stat.number}
                   </div>
-                  <div className="text-sm text-white/80 font-medium">{stat.label}</div>
                 </div>
-              ))}
-            </div>
+                <div className="text-sm text-white/80 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -218,7 +270,7 @@ export default function Home() {
             <div className="slide-up">
               <h2 className="heading-2 mb-6">Why Join NUGSA-Germany?</h2>
               <p className="body-large mb-8 text-muted-foreground">
-                Become part of a thriving community that supports your academic journey, 
+                Become part of a thriving community that supports your academic journey,
                 professional growth, and cultural connection in Germany.
               </p>
               <ul className="space-y-4">
@@ -238,7 +290,7 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="professional-card-elevated p-8">
                 <div className="space-y-6">
@@ -281,7 +333,7 @@ export default function Home() {
         <div className="section-container text-center">
           <h2 className="heading-2 text-white mb-4">Ready to Begin Your Journey?</h2>
           <p className="body-large text-white/90 mb-8 max-w-2xl mx-auto">
-            Join hundreds of Ghanaian students who are building their future in Germany. 
+            Join hundreds of Ghanaian students who are building their future in Germany.
             Your success is our mission.
           </p>
           <Button asChild size="lg" variant="secondary" className="text-base font-semibold px-8 py-6">

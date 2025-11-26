@@ -24,10 +24,10 @@ RETURNS TABLE (
   linkedin_url TEXT,
   whatsapp_number TEXT,
   bio TEXT,
-  india_phone TEXT,
-  india_state TEXT,
-  india_city TEXT,
-  india_pincode TEXT,
+  germany_phone TEXT,
+  germany_state TEXT,
+  germany_city TEXT,
+  germany_pincode TEXT,
   gender TEXT,
   marital_status TEXT,
   level_of_study TEXT,
@@ -62,10 +62,10 @@ BEGIN
     p.linkedin_url,
     p.whatsapp_number,
     p.bio,
-    p.india_phone,
-    p.india_state,
-    p.india_city,
-    p.india_pincode,
+    p.germany_phone,
+    p.germany_state,
+    p.germany_city,
+    p.germany_pincode,
     p.gender,
     p.marital_status,
     p.level_of_study,
@@ -85,7 +85,7 @@ $$;
 CREATE OR REPLACE FUNCTION get_public_stats()
 RETURNS TABLE (
   active_students BIGINT,
-  indian_states BIGINT,
+  german_states BIGINT,
   universities BIGINT
 ) 
 LANGUAGE plpgsql
@@ -95,7 +95,7 @@ BEGIN
   RETURN QUERY
   SELECT 
     (SELECT COUNT(*)::BIGINT FROM profiles WHERE is_verified = TRUE) as active_students,
-    (SELECT COUNT(DISTINCT india_state)::BIGINT FROM profiles WHERE is_verified = TRUE AND india_state IS NOT NULL) as indian_states,
+    (SELECT COUNT(DISTINCT germany_state)::BIGINT FROM profiles WHERE is_verified = TRUE AND germany_state IS NOT NULL) as german_states,
     (SELECT COUNT(DISTINCT university)::BIGINT FROM profiles WHERE is_verified = TRUE AND university IS NOT NULL) as universities;
 END;
 $$;

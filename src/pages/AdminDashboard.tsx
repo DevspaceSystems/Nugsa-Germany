@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
   CardDescription
 } from "@/components/ui/card";
@@ -15,31 +15,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { VerificationModule } from "@/components/admin/VerificationModule";
 import { HeroSlideshowManager } from "@/components/admin/HeroSlideshowManager";
 import { StudentDetailModal } from "@/components/admin/StudentDetailModal";
-import { 
-  Users, 
-  FileText, 
-  Settings, 
-  Plus, 
-  Upload, 
+import {
+  Users,
+  FileText,
+  Settings,
+  Plus,
+  Upload,
   Award,
   Calendar,
   Trash2,
@@ -93,8 +93,7 @@ interface Announcement {
   title: string;
   content: string;
   category: string;
-  image_url: string;
-  images: string[];
+  image_url: string | null;
   featured: boolean;
   published: boolean;
   author_id: string;
@@ -106,6 +105,7 @@ interface ContactInquiry {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   subject: string;
   message: string;
   status: 'pending' | 'in_progress' | 'resolved';
@@ -162,6 +162,9 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("verification");
   const [loading, setLoading] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
     verifiedStudents: 0,
@@ -254,7 +257,7 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     if (!user) return;
-    
+
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -265,12 +268,9 @@ export default function AdminDashboard() {
       if (error) throw error;
 
       if (profile?.role !== "admin" || !profile?.is_verified) {
-        toast({
-          title: "Access Denied",
-          description: "You must be an admin to access this page",
-          variant: "destructive",
-        });
-        navigate("/dashboard");
+        setAccessDenied(true);
+        setUserRole(profile?.role);
+        setIsVerified(profile?.is_verified);
         return;
       }
 
@@ -289,9 +289,11 @@ export default function AdminDashboard() {
         description: "Failed to verify admin access",
         variant: "destructive",
       });
-      navigate("/dashboard");
     }
   };
+
+
+
 
   const fetchStats = async () => {
     try {
@@ -379,10 +381,7 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAnnouncements((data || []).map(item => ({
-        ...item,
-        images: []
-      })));
+      setAnnouncements(data || []);
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast({
@@ -545,7 +544,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       let imageUrl = '';
-      
+
       if (selectedBoardMemberImage) {
         const fileExt = selectedBoardMemberImage.name.split('.').pop();
         const fileName = `board-member-${Date.now()}.${fileExt}`;
@@ -688,7 +687,7 @@ export default function AdminDashboard() {
       let imageUrls: string[] = [];
       let legacyImageUrl = '';
       let joinedImageUrls = '';
-      
+
       if (selectedAnnouncementImages.length > 0) {
         for (const image of selectedAnnouncementImages) {
           const fileExt = image.name.split('.').pop();
@@ -705,9 +704,9 @@ export default function AdminDashboard() {
             .getPublicUrl(fileName);
 
           imageUrls.push(publicUrl);
-          joinedImageUrls = imageUrls.join(';'); 
+          joinedImageUrls = imageUrls.join(';');
         }
-        
+
         legacyImageUrl = imageUrls[0] || '';
       }
 
@@ -719,8 +718,7 @@ export default function AdminDashboard() {
           category: newAnnouncement.category as any,
           featured: newAnnouncement.featured,
           published: newAnnouncement.published,
-          image_url: JSON.stringify(imageUrls),
-          images: joinedImageUrls,
+          image_url: imageUrls[0] || null,
           author_id: user.id
         }]);
 
@@ -756,7 +754,7 @@ export default function AdminDashboard() {
     try {
       const { error } = await supabase
         .from('contact_inquiries')
-        .update({ 
+        .update({
           status,
           resolved_at: status === 'resolved' ? new Date().toISOString() : null,
           resolved_by: status === 'resolved' ? user?.id : null
@@ -785,7 +783,7 @@ export default function AdminDashboard() {
     try {
       const { error } = await supabase
         .from('assistance_requests')
-        .update({ 
+        .update({
           status,
           resolved_at: status === 'resolved' ? new Date().toISOString() : null,
           reviewed_by: user?.id
@@ -910,11 +908,11 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredInquiries = contactInquiries.filter(inquiry => 
+  const filteredInquiries = contactInquiries.filter(inquiry =>
     inquiryFilter === "all" || inquiry.status === inquiryFilter
   );
 
-  const filteredAssistanceRequests = assistanceRequests.filter(request => 
+  const filteredAssistanceRequests = assistanceRequests.filter(request =>
     assistanceFilter === "all" || request.status === assistanceFilter
   );
 
@@ -930,24 +928,24 @@ export default function AdminDashboard() {
   }
 
   function timeAgo(dateString: string): string {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diff < 60) return `${diff} second${diff !== 1 ? "s" : ""} ago`;
-  const minutes = Math.floor(diff / 60);
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days !== 1 ? "s" : ""} ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) return `${weeks} week${weeks !== 1 ? "s" : ""} ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
-  const years = Math.floor(days / 365);
-  return `${years} year${years !== 1 ? "s" : ""} ago`;
-}
+    if (diff < 60) return `${diff} second${diff !== 1 ? "s" : ""} ago`;
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days !== 1 ? "s" : ""} ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks} week${weeks !== 1 ? "s" : ""} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
+    const years = Math.floor(days / 365);
+    return `${years} year${years !== 1 ? "s" : ""} ago`;
+  }
 
   const renderBoardMembersTab = () => (
     <div className="space-y-6">
@@ -966,7 +964,7 @@ export default function AdminDashboard() {
                 <Input
                   id="member-name"
                   value={newBoardMember.name}
-                  onChange={(e) => setNewBoardMember({...newBoardMember, name: e.target.value})}
+                  onChange={(e) => setNewBoardMember({ ...newBoardMember, name: e.target.value })}
                   placeholder="Enter full name"
                   required
                 />
@@ -976,23 +974,23 @@ export default function AdminDashboard() {
                 <Input
                   id="member-position"
                   value={newBoardMember.position}
-                  onChange={(e) => setNewBoardMember({...newBoardMember, position: e.target.value})}
+                  onChange={(e) => setNewBoardMember({ ...newBoardMember, position: e.target.value })}
                   placeholder="e.g., President, Vice President"
                   required
                 />
               </div>
               <div>
                 <Label htmlFor="member-year">Year</Label>
-                <Select 
-                  value={newBoardMember.year} 
-                  onValueChange={(value) => setNewBoardMember({...newBoardMember, year: value})}
+                <Select
+                  value={newBoardMember.year}
+                  onValueChange={(value) => setNewBoardMember({ ...newBoardMember, year: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Years</SelectItem>
-                    {Array.from({length: 7}, (_, i) => {
+                    {Array.from({ length: 7 }, (_, i) => {
                       const startYear = 2019 + i;
                       const endYear = startYear + 1;
                       const yearRange = `${startYear}-${endYear}`;
@@ -1020,7 +1018,7 @@ export default function AdminDashboard() {
               <Textarea
                 id="member-academic"
                 value={newBoardMember.academic_background}
-                onChange={(e) => setNewBoardMember({...newBoardMember, academic_background: e.target.value})}
+                onChange={(e) => setNewBoardMember({ ...newBoardMember, academic_background: e.target.value })}
                 placeholder="Enter academic background"
               />
             </div>
@@ -1029,7 +1027,7 @@ export default function AdminDashboard() {
               <Textarea
                 id="member-leadership"
                 value={newBoardMember.leadership_experience}
-                onChange={(e) => setNewBoardMember({...newBoardMember, leadership_experience: e.target.value})}
+                onChange={(e) => setNewBoardMember({ ...newBoardMember, leadership_experience: e.target.value })}
                 placeholder="Enter leadership experience"
               />
             </div>
@@ -1038,7 +1036,7 @@ export default function AdminDashboard() {
               <Textarea
                 id="member-quote"
                 value={newBoardMember.quote}
-                onChange={(e) => setNewBoardMember({...newBoardMember, quote: e.target.value})}
+                onChange={(e) => setNewBoardMember({ ...newBoardMember, quote: e.target.value })}
                 placeholder="Enter inspiring quote or vision"
               />
             </div>
@@ -1057,9 +1055,9 @@ export default function AdminDashboard() {
                 )}
               </Button>
               {editingBoardMember && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setEditingBoardMember(null);
                     setNewBoardMember({
@@ -1096,17 +1094,17 @@ export default function AdminDashboard() {
                 </SelectTrigger>
                 <SelectContent>
 
-                  {Array.from({length: ((new Date()).getFullYear() - 2019 + 1)}, (_, i) => {
-                        const startYear = 2019 + i;
-                        const endYear = startYear + 1;
-                        const yearRange = `${startYear}-${endYear}`;
-                        return (
-                          <SelectItem key={yearRange} value={yearRange}>
-                            {yearRange}
-                          </SelectItem>
-                        );
-                      })}
-                  
+                  {Array.from({ length: ((new Date()).getFullYear() - 2019 + 1) }, (_, i) => {
+                    const startYear = 2019 + i;
+                    const endYear = startYear + 1;
+                    const yearRange = `${startYear}-${endYear}`;
+                    return (
+                      <SelectItem key={yearRange} value={yearRange}>
+                        {yearRange}
+                      </SelectItem>
+                    );
+                  })}
+
                 </SelectContent>
               </Select>
               <Input
@@ -1258,7 +1256,7 @@ export default function AdminDashboard() {
                 <Input
                   id="constitution-title"
                   value={newConstitution.title}
-                  onChange={(e) => setNewConstitution({...newConstitution, title: e.target.value})}
+                  onChange={(e) => setNewConstitution({ ...newConstitution, title: e.target.value })}
                   placeholder="Enter document title"
                   required
                 />
@@ -1268,7 +1266,7 @@ export default function AdminDashboard() {
                 <Input
                   id="constitution-version"
                   value={newConstitution.version}
-                  onChange={(e) => setNewConstitution({...newConstitution, version: e.target.value})}
+                  onChange={(e) => setNewConstitution({ ...newConstitution, version: e.target.value })}
                   placeholder="Enter version number"
                   required
                 />
@@ -1316,9 +1314,9 @@ export default function AdminDashboard() {
                       {timeAgo(doc.created_at)}
                     </Badge>
                     <div className="flex space-x-2">
-                      <a 
-                        href={doc.file_url} 
-                        target="_blank" 
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline text-sm"
                       >
@@ -1375,7 +1373,7 @@ export default function AdminDashboard() {
               <Input
                 id="announcement-title"
                 value={newAnnouncement.title}
-                onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
                 placeholder="Enter announcement title"
                 required
               />
@@ -1385,7 +1383,7 @@ export default function AdminDashboard() {
               <Textarea
                 id="announcement-content"
                 value={newAnnouncement.content}
-                onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
                 placeholder="Enter announcement content"
                 rows={4}
                 required
@@ -1394,9 +1392,9 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="announcement-category">Category</Label>
-                <Select 
-                  value={newAnnouncement.category} 
-                  onValueChange={(value) => setNewAnnouncement({...newAnnouncement, category: value})}
+                <Select
+                  value={newAnnouncement.category}
+                  onValueChange={(value) => setNewAnnouncement({ ...newAnnouncement, category: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -1435,7 +1433,7 @@ export default function AdminDashboard() {
                 <Switch
                   id="announcement-featured"
                   checked={newAnnouncement.featured}
-                  onCheckedChange={(checked) => setNewAnnouncement({...newAnnouncement, featured: checked})}
+                  onCheckedChange={(checked) => setNewAnnouncement({ ...newAnnouncement, featured: checked })}
                 />
                 <Label htmlFor="announcement-featured">Featured</Label>
               </div>
@@ -1464,46 +1462,64 @@ export default function AdminDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {announcements.map((announcement) => (
               <Card key={announcement.id}>
-                {announcement.image_url && (
-                  <div className="aspect-video bg-gray-100">
-                    {JSON.parse(announcement.image_url).map((url: string, index: number) => (
+                {announcement.image_url && (() => {
+                  try {
+                    // Try to parse as JSON array (for legacy data)
+                    const urls = JSON.parse(announcement.image_url);
+                    if (Array.isArray(urls)) {
+                      return (
+                        <div className="aspect-video bg-gray-100">
+                          <img
+                            src={urls[0]}
+                            alt={announcement.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      );
+                    }
+                  } catch {
+                    // If parsing fails, treat as a single URL string
+                  }
+                  // Handle as a single URL string
+                  return (
+                    <div className="aspect-video bg-gray-100">
                       <img
-                        key={index}
-                        src={url}
-                        alt={`${announcement.title} - Image ${index + 1}`}
+                        src={announcement.image_url}
+                        alt={announcement.title}
                         className="w-full h-full object-cover"
                       />
-                    ))}
-                  </div>
-                )}
-                <CardContent className="p-4">
+                    </div>
+                  );
+                })()}
+                <CardContent className="p-3">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium">{announcement.title}</h4>
+                    <h4 className="font-medium text-sm">{announcement.title}</h4>
                     <div className="flex space-x-1">
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="text-[10px] px-1 py-0">
                         {announcement.category}
                       </Badge>
                       {announcement.featured && (
-                        <Badge variant="default">Featured</Badge>
+                        <Badge variant="default" className="text-[10px] px-1 py-0">Featured</Badge>
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
+                  <p className="text-xs text-muted-foreground line-clamp-3">
                     {announcement.content}
                   </p>
                   <div className="flex justify-between items-center mt-4">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-[10px] text-gray-500">
                       {new Date(announcement.created_at).toLocaleDateString()}
                     </span>
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-7 w-7 p-0"
                       onClick={() => handleDeleteAnnouncement(announcement.id)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </CardContent>
@@ -1561,10 +1577,10 @@ export default function AdminDashboard() {
                     <TableCell>{inquiry.subject}</TableCell>
                     <TableCell>{inquiry.message}</TableCell>
                     <TableCell>
-                      <Badge 
+                      <Badge
                         variant={
                           inquiry.status === 'pending' ? 'secondary' :
-                          inquiry.status === 'resolved' ? 'default' : 'outline'
+                            inquiry.status === 'resolved' ? 'default' : 'outline'
                         }
                       >
                         {inquiry.status.replace('_', ' ')}
@@ -1690,10 +1706,10 @@ export default function AdminDashboard() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge 
+                      <Badge
                         variant={
                           request.status === 'pending' ? 'secondary' :
-                          request.status === 'resolved' ? 'default' : 'outline'
+                            request.status === 'resolved' ? 'default' : 'outline'
                         }
                       >
                         {request.status.replace('_', ' ')}
@@ -1815,7 +1831,7 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          <Button 
+          <Button
             onClick={() => handleFinanceUpdate('bank_transfer_details')}
             disabled={loading}
           >
@@ -1876,7 +1892,7 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          <Button 
+          <Button
             onClick={() => handleFinanceUpdate('mobile_money_details')}
             disabled={loading}
           >
@@ -1953,7 +1969,7 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          <Button 
+          <Button
             onClick={() => handleFinanceUpdate('contact_details')}
             disabled={loading}
           >
@@ -1994,8 +2010,39 @@ export default function AdminDashboard() {
     </Card>
   );
 
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600 flex items-center gap-2">
+              <Shield className="h-6 w-6" />
+              Access Denied
+            </CardTitle>
+            <CardDescription>
+              You do not have permission to view the Admin Dashboard.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-md space-y-2">
+              <p><strong>Current Role:</strong> {userRole || 'None'}</p>
+              <p><strong>Verified:</strong> {isVerified ? 'Yes' : 'No'}</p>
+              <p><strong>User ID:</strong> {user?.id}</p>
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>To fix this, please run the SQL command to update your role to 'admin' and is_verified to true.</p>
+            </div>
+            <Button onClick={() => navigate("/dashboard")} className="w-full">
+              Go to Student Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
@@ -2067,11 +2114,10 @@ export default function AdminDashboard() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center px-4 py-2 rounded-t-lg font-medium transition-colors ${
-                activeTab === id 
-                  ? "bg-primary text-primary-foreground border-b-2 border-primary" 
-                  : "text-muted-foreground hover:text-primary"
-              }`}
+              className={`flex items-center px-4 py-2 rounded-t-lg font-medium transition-colors ${activeTab === id
+                ? "bg-primary text-primary-foreground border-b-2 border-primary"
+                : "text-muted-foreground hover:text-primary"
+                }`}
             >
               <Icon className="w-4 h-4 mr-2" />
               {label}

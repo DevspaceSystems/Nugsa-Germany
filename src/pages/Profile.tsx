@@ -11,13 +11,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Camera, Save, User, CheckCircle, Clock, FileText, Upload, Eye, EyeOff, Key } from "lucide-react";
+import { Camera, Save, User, CheckCircle, Clock, Mail, MapPin, GraduationCap, Calendar, FileText, Upload, X, Eye, EyeOff, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import type { Tables } from "@/integrations/supabase/types";
+import { GERMAN_UNIVERSITIES } from "@/lib/universities";
 
-type Profile = Tables<"profiles">;
+type Profile = Tables<"profiles"> & {
+  india_address?: string | null;
+  india_city?: string | null;
+  india_state?: string | null;
+  india_pincode?: string | null;
+  ghana_address?: string | null;
+  ghana_city?: string | null;
+  ghana_region?: string | null;
+  ghana_pincode?: string | null;
+  ghana_mobile_number?: string | null;
+};
 
 export default function Profile() {
   const { user } = useAuth();
@@ -42,7 +53,7 @@ export default function Profile() {
       const timer = setTimeout(() => {
         navigate("/auth");
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     } else {
       fetchProfile();
@@ -51,15 +62,15 @@ export default function Profile() {
 
   const fetchProfile = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
 
-      // console.log('Profile error:', error);
-      // console.log('User ID:', user?.id);
+    // console.log('Profile error:', error);
+    // console.log('User ID:', user?.id);
 
     if (data && !error) {
       setProfile(data);
@@ -69,19 +80,19 @@ export default function Profile() {
 
   const handleInputChange = (field: keyof Profile, value: string | number | boolean | Date | null) => {
     if (profile) {
-      console.log("Attribute:",field + " " + value);
+      console.log("Attribute:", field + " " + value);
       setProfile({ ...profile, [field]: value });
     }
   };
 
   const handleFileUpload = async (file: File, type: 'profile' | 'passport') => {
     if (!user) return;
-    
+
     setUploading(true);
     try {
       const bucketName = type === 'profile' ? 'profile-pictures' : 'documents';
       const fileName = `${user.id}/${type}_${Date.now()}.${file.name.split('.').pop()}`;
-      
+
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
         .upload(fileName, file);
@@ -112,7 +123,7 @@ export default function Profile() {
 
   const handleSave = async () => {
     if (!profile || !user) return;
-    
+
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
@@ -183,7 +194,7 @@ export default function Profile() {
   // Add password update function
   const handlePasswordUpdate = async () => {
     if (!user) return;
-    
+
     if (newPassword !== confirmPassword) {
       toast({
         title: "Error",
@@ -192,7 +203,7 @@ export default function Profile() {
       });
       return;
     }
-    
+
     if (newPassword.length < 6) {
       toast({
         title: "Error",
@@ -201,16 +212,16 @@ export default function Profile() {
       });
       return;
     }
-    
+
     setUpdatingPassword(true);
-    
+
     try {
       // First, reauthenticate the user with their current password
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email!,
         password: currentPassword,
       });
-      
+
       // if (signInError) {
       //   toast({
       //     title: "Error",
@@ -219,26 +230,26 @@ export default function Profile() {
       //   });
       //   return;
       // }
-      
+
       // Update the password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      
+
       if (updateError) {
         throw updateError;
       }
-      
+
       toast({
         title: "Success",
         description: "Password updated successfully!",
       });
-      
+
       // Clear the form
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      
+
     } catch (error) {
       toast({
         title: "Error",
@@ -340,8 +351,8 @@ export default function Profile() {
                   if (file) handleFileUpload(file, 'profile');
                 }}
               />
-              <button 
-                className="neon-button w-full mb-4" 
+              <button
+                className="neon-button w-full mb-4"
                 onClick={() => document.getElementById('profile-image')?.click()}
                 disabled={uploading}
               >
@@ -485,7 +496,7 @@ export default function Profile() {
                     onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
-                 </div>
+                </div>
               </div>
             </div>
 
@@ -533,12 +544,21 @@ export default function Profile() {
                 </div>
                 <div>
                   <Label htmlFor="university">University/Institution</Label>
-                  <Input
-                    id="university"
+                  <Select
                     value={profile.university || ""}
-                    onChange={(e) => handleInputChange("university", e.target.value)}
-                    placeholder="e.g., Humboldt University of Berlin"
-                  />
+                    onValueChange={(value) => handleInputChange("university", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your university" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {GERMAN_UNIVERSITIES.map((uni) => (
+                        <SelectItem key={uni} value={uni}>
+                          {uni}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="major">Major/Course</Label>
@@ -565,10 +585,10 @@ export default function Profile() {
                       <SelectItem value="4">4th Year</SelectItem>
                       <SelectItem value="5">5th Year</SelectItem>
                       <SelectItem value="6">6th Year</SelectItem>
-                      <SelectItem value="6">7th Year</SelectItem>
-                      <SelectItem value="6">8th Year</SelectItem>
-                      <SelectItem value="6">9th Year</SelectItem>
-                      <SelectItem value="6">10th Year</SelectItem>
+                      <SelectItem value="7">7th Year</SelectItem>
+                      <SelectItem value="8">8th Year</SelectItem>
+                      <SelectItem value="9">9th Year</SelectItem>
+                      <SelectItem value="10">10th Year</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -634,52 +654,52 @@ export default function Profile() {
                 </div> */}
 
                 {/* {!profile.same_as_current_address && ( */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-4">Ghanaian Address</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="ghana_address">Street Address</Label>
-                        <Input
-                          id="ghana_address"
-                          value={profile.ghana_address || ""}
-                          onChange={(e) => handleInputChange("ghana_address", e.target.value)}
-                          placeholder="123 Main Street"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="ghana_region">State/Region</Label>
-                        <Input
-                          id="ghana_region"
-                          value={profile.ghana_region || ""}
-                          onChange={(e) => handleInputChange("ghana_region", e.target.value)}
-                          placeholder="Accra"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="ghana_city">City</Label>
-                        <Input
-                          id="ghana_city"
-                          value={profile.ghana_city || ""}
-                          onChange={(e) => handleInputChange("ghana_city", e.target.value)}
-                          placeholder="Suyane"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="ghana_pincode">Postal Code</Label>
-                        <Input
-                          id="ghana_pincode"
-                          value={profile.ghana_pincode || ""}
-                          onChange={(e) => handleInputChange("ghana_pincode", e.target.value)}
-                          placeholder="GA-123-4567"
-                        />
-                      </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Ghanaian Address</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="ghana_address">Street Address</Label>
+                      <Input
+                        id="ghana_address"
+                        value={profile.ghana_address || ""}
+                        onChange={(e) => handleInputChange("ghana_address", e.target.value)}
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="ghana_region">State/Region</Label>
+                      <Input
+                        id="ghana_region"
+                        value={profile.ghana_region || ""}
+                        onChange={(e) => handleInputChange("ghana_region", e.target.value)}
+                        placeholder="Accra"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="ghana_city">City</Label>
+                      <Input
+                        id="ghana_city"
+                        value={profile.ghana_city || ""}
+                        onChange={(e) => handleInputChange("ghana_city", e.target.value)}
+                        placeholder="Suyane"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="ghana_pincode">Postal Code</Label>
+                      <Input
+                        id="ghana_pincode"
+                        value={profile.ghana_pincode || ""}
+                        onChange={(e) => handleInputChange("ghana_pincode", e.target.value)}
+                        placeholder="GA-123-4567"
+                      />
                     </div>
                   </div>
+                </div>
                 {/* )} */}
               </CardContent>
             </Card>
 
-          
+
 
             {/* Emergency Contact */}
             <Card>
@@ -746,8 +766,8 @@ export default function Profile() {
                         }
                       }}
                     />
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => document.getElementById('passport-document')?.click()}
                       disabled={uploading}
                     >
@@ -799,9 +819,9 @@ export default function Profile() {
 
             {/* Save Button */}
             <div className="flex justify-center">
-              <button 
-                onClick={handleSave} 
-                disabled={saving} 
+              <button
+                onClick={handleSave}
+                disabled={saving}
                 className="neon-button px-12 py-4 text-lg font-semibold min-w-48"
               >
                 {saving ? (
@@ -817,18 +837,18 @@ export default function Profile() {
               </button>
             </div>
 
-                
-            
+
+
             {/* Add Password Update Section */}
             <div className="neon-card p-6">
               <h3 className="text-xl font-semibold gradient-text mb-6 flex items-center justify-center">
                 <Key className="w-5 h-5 mr-2" />
                 Update Password
               </h3>
-              
+
               <div className="space-y-4">
-                
-                
+
+
                 <div className="space-y-2">
                   <Label htmlFor="new-password">New Password</Label>
                   <div className="relative">
@@ -852,7 +872,7 @@ export default function Profile() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
                   <div className="relative">
@@ -876,10 +896,10 @@ export default function Profile() {
                     </button>
                   </div>
                 </div>
-                
+
                 <Button
                   onClick={handlePasswordUpdate}
-                  disabled={updatingPassword  || !newPassword || !confirmPassword}
+                  disabled={updatingPassword || !newPassword || !confirmPassword}
                   className="w-full neon-button"
                 >
                   {updatingPassword ? (

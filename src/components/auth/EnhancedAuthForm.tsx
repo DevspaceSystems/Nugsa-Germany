@@ -45,11 +45,11 @@ export function EnhancedAuthForm() {
     graduationYear: "",
     
     // German Address
-    indiaAddress: "",
-    indiaCity: "",
-    indiaState: "",
-    indiaPincode: "",
-    indiaPhone: "",
+    germanyAddress: "",
+    germanyCity: "",
+    germanyState: "",
+    germanyPincode: "",
+    germanyPhone: "",
 
     // Ghanaian Address
     ghanaAddress: "",
@@ -160,7 +160,7 @@ export function EnhancedAuthForm() {
       formData.gender.trim() !== "" &&
       formData.maritalStatus.trim() !== "" &&
       formData.dateOfBirth !== null &&
-      formData.indiaPhone.trim() !== "" &&
+      formData.germanyPhone.trim() !== "" &&
       formData.ghanaMobileNumber.trim() !== "" &&
       formData.whatsappNumber.trim() !== "" &&
       formData.linkedinUrl.trim() !== ""
@@ -180,10 +180,10 @@ export function EnhancedAuthForm() {
 
   const validateStep4 = () => {
     return (
-      formData.indiaAddress.trim() !== "" &&
-      formData.indiaCity.trim() !== "" &&
-      formData.indiaState.trim() !== "" &&
-      formData.indiaPincode.trim() !== "" &&
+      formData.germanyAddress.trim() !== "" &&
+      formData.germanyCity.trim() !== "" &&
+      formData.germanyState.trim() !== "" &&
+      formData.germanyPincode.trim() !== "" &&
       formData.ghanaAddress.trim() !== "" &&
       formData.ghanaCity.trim() !== "" &&
       formData.ghanaRegion.trim() !== "" &&
@@ -280,6 +280,15 @@ export function EnhancedAuthForm() {
       if (!authData.user) throw new Error("No user data returned");
 
       console.log("2. User created:", authData.user.id);
+      console.log("2a. Session:", authData.session);
+      
+      // Wait a moment for the session to be established
+      if (!authData.session) {
+        console.log("2b. No session yet, waiting...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("2c. Session after wait:", session);
+      }
 
       // Prepare profile data
       const profileData = {
@@ -301,11 +310,11 @@ export function EnhancedAuthForm() {
         expected_completion_year: formData.expectedCompletionYear ? parseInt(formData.expectedCompletionYear) : null,
         year_of_study: formData.yearOfStudy ? parseInt(formData.yearOfStudy) : null,
         graduation_year: formData.graduationYear ? parseInt(formData.graduationYear) : null,
-        india_phone: formData.indiaPhone,
-        india_state: formData.indiaState,
-        india_city: formData.indiaCity,
-        india_address: formData.indiaAddress,
-        india_pincode: formData.indiaPincode,
+        germany_phone: formData.germanyPhone,
+        germany_state: formData.germanyState,
+        germany_city: formData.germanyCity,
+        germany_address: formData.germanyAddress,
+        germany_pincode: formData.germanyPincode,
         ghana_pincode: formData.ghanaPincode,
         ghana_region: formData.ghanaRegion,
         ghana_address: formData.ghanaAddress,
@@ -328,36 +337,73 @@ export function EnhancedAuthForm() {
         updated_at: new Date().toISOString(),
       };
 
-      // Try UPDATE first (if profile exists)
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(profileData)
-        .eq('id', authData.user.id);
+      // Upload files if provided AND we have a session
+      // If no session (email confirmation required), skip file uploads for now
+      // User can upload files after confirming email
+      let passportUrl = "";
+      let profilePictureUrl = "";
 
-      if (updateError) {
-        console.log("3. Update failed, trying insert...");
-        
-        // If update failed, try INSERT (with created_at)
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            ...profileData,
-            created_at: new Date().toISOString(),
-          });
-
-        if (insertError) {
-          console.error("4. Insert also failed:", insertError);
-          throw insertError;
+      if (authData.session && files.passport) {
+        try {
+          const passportPath = `${authData.user.id}/passport_${Date.now()}.${files.passport.name.split('.').pop()}`;
+          passportUrl = await uploadFile(files.passport, 'documents', passportPath);
+          profileData.passport_document_url = passportUrl;
+        } catch (uploadError) {
+          console.warn("Passport upload failed (will be available after email confirmation):", uploadError);
         }
+      }
+
+      if (authData.session && files.profilePicture) {
+        try {
+          const picturePath = `${authData.user.id}/profile_${Date.now()}.${files.profilePicture.name.split('.').pop()}`;
+          profilePictureUrl = await uploadFile(files.profilePicture, 'profile-pictures', picturePath);
+          profileData.profile_image_url = profilePictureUrl;
+        } catch (uploadError) {
+          console.warn("Profile picture upload failed (will be available after email confirmation):", uploadError);
+        }
+      }
+
+      // Since there's no session yet (email confirmation required),
+      // we MUST use the RPC function which bypasses RLS
+      console.log("3. Upserting profile using database function (no session, must use RPC)...");
+      console.log("Profile data keys:", Object.keys(profileData));
+      
+      // Convert profileData to JSONB format for the function
+      // Remove undefined values and convert to proper types
+      const cleanProfileData: any = {};
+      Object.keys(profileData).forEach(key => {
+        const value = (profileData as any)[key];
+        if (value !== undefined && value !== null && value !== '') {
+          cleanProfileData[key] = value;
+        }
+      });
+      
+      console.log("3a. Cleaned profile data:", cleanProfileData);
+      
+      // Call RPC function - this MUST work since it bypasses RLS
+      const { data: rpcData, error: upsertError } = await supabase.rpc('upsert_user_profile', {
+        profile_data: cleanProfileData
+      });
+
+      if (upsertError) {
+        console.error("4. RPC failed:", upsertError);
+        console.error("Error details:", JSON.stringify(upsertError, null, 2));
         
-        console.log("5. Profile inserted successfully");
+        // If RPC fails, we can't use direct insert/update without a session
+        // The profile will be created by the trigger, user can complete it after email confirmation
+        console.warn("5. Profile will be created by trigger. User can complete profile after email confirmation.");
+        
+        // Don't throw error - let the trigger handle basic profile creation
+        // The user can complete their profile after confirming their email
       } else {
-        console.log("6. Profile updated successfully");
+        console.log("5. Profile upserted successfully via RPC", rpcData);
       }
 
       toast({
         title: "Sign up successful!",
-        description: "Your account has been created with complete profile.",
+        description: authData.session 
+          ? "Your account has been created with complete profile." 
+          : "Please check your email to confirm your account before signing in.",
       });
 
       setActiveTab("signin");
@@ -380,15 +426,27 @@ export function EnhancedAuthForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) {
+        console.error("Sign in error:", error);
+        
+        // Provide more helpful error messages
+        let errorMessage = error.message;
+        if (error.message?.includes('email') || error.message?.includes('Email')) {
+          errorMessage = "Please check your email and confirm your account before signing in.";
+        } else if (error.message?.includes('password') || error.message?.includes('Password')) {
+          errorMessage = "Invalid email or password. Please try again.";
+        } else if (error.status === 400) {
+          errorMessage = "Please confirm your email address before signing in. Check your inbox for the confirmation link.";
+        }
+        
         toast({
           title: "Sign in failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
@@ -713,11 +771,11 @@ export function EnhancedAuthForm() {
                       <div className="grid grid-cols-3 gap-4">
                         
                         <div className="space-y-2">
-                          <Label htmlFor="indiaPhone" className="text-sm font-medium text-gray-700">Germany phone *</Label>
+                          <Label htmlFor="germanyPhone" className="text-sm font-medium text-gray-700">Germany phone *</Label>
                           <Input
-                            id="indiaPhone"
-                            value={formData.indiaPhone}
-                            onChange={(e) => handleInputChange("indiaPhone", e.target.value)}
+                            id="germanyPhone"
+                            value={formData.germanyPhone}
+                            onChange={(e) => handleInputChange("germanyPhone", e.target.value)}
                             placeholder="+49 1512 3456789"
                             className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                             required
@@ -874,22 +932,22 @@ export function EnhancedAuthForm() {
                         <h4 className="font-medium text-gray-700">German Address *</h4>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="indiaAddress" className="text-sm font-medium text-gray-700">Street address *</Label>
+                            <Label htmlFor="germanyAddress" className="text-sm font-medium text-gray-700">Street address *</Label>
                             <Input
-                              id="indiaAddress"
-                              value={formData.indiaAddress}
-                              onChange={(e) => handleInputChange("indiaAddress", e.target.value)}
+                              id="germanyAddress"
+                              value={formData.germanyAddress}
+                              onChange={(e) => handleInputChange("germanyAddress", e.target.value)}
                               placeholder="123 Main Street"
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               required
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="indiaCity" className="text-sm font-medium text-gray-700">City *</Label>
+                            <Label htmlFor="germanyCity" className="text-sm font-medium text-gray-700">City *</Label>
                             <Input
-                              id="indiaCity"
-                              value={formData.indiaCity}
-                              onChange={(e) => handleInputChange("indiaCity", e.target.value)}
+                              id="germanyCity"
+                              value={formData.germanyCity}
+                              onChange={(e) => handleInputChange("germanyCity", e.target.value)}
                               placeholder="Berlin"
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               required
@@ -898,22 +956,22 @@ export function EnhancedAuthForm() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="indiaState" className="text-sm font-medium text-gray-700">State *</Label>
+                            <Label htmlFor="germanyState" className="text-sm font-medium text-gray-700">State *</Label>
                             <Input
-                              id="indiaState"
-                              value={formData.indiaState}
-                              onChange={(e) => handleInputChange("indiaState", e.target.value)}
+                              id="germanyState"
+                              value={formData.germanyState}
+                              onChange={(e) => handleInputChange("germanyState", e.target.value)}
                               placeholder="Berlin"
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               required
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="indiaPincode" className="text-sm font-medium text-gray-700">Postal code *</Label>
+                            <Label htmlFor="germanyPincode" className="text-sm font-medium text-gray-700">Postal code *</Label>
                             <Input
-                              id="indiaPincode"
-                              value={formData.indiaPincode}
-                              onChange={(e) => handleInputChange("indiaPincode", e.target.value)}
+                              id="germanyPincode"
+                              value={formData.germanyPincode}
+                              onChange={(e) => handleInputChange("germanyPincode", e.target.value)}
                               placeholder="10115"
                               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                               required

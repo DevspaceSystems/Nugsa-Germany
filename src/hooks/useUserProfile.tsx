@@ -25,11 +25,11 @@ interface UserProfile {
   whatsapp_number?: string | null;
   bio?: string | null;
   // school_name?: string | null; // Remove - not in SQL schema
-  india_phone?: string | null;
-  india_state?: string | null;
-  india_city?: string | null;
-  india_address?: string | null; // Missing in your interface
-  india_pincode?: string | null;
+  germany_phone?: string | null;
+  germany_state?: string | null;
+  germany_city?: string | null;
+  germany_address?: string | null; // Missing in your interface
+  germany_pincode?: string | null;
   gender?: string | null;
   marital_status?: string | null;
   ghana_mobile_number?: string | null;

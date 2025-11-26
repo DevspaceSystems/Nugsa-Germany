@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  MessageSquare, 
-  Bell, 
+import {
+  Users,
+  MessageSquare,
+  Bell,
   Heart,
   PlusCircle,
   Calendar,
@@ -36,7 +36,7 @@ export default function Dashboard() {
       const timer = setTimeout(() => {
         navigate("/auth");
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     } else {
       fetchProfile();
@@ -45,9 +45,16 @@ export default function Dashboard() {
     }
   }, [user, navigate]);
 
+  // Redirect admins to admin dashboard
+  useEffect(() => {
+    if (profile?.role === 'admin' && profile?.is_verified) {
+      navigate("/admin-dashboard");
+    }
+  }, [profile, navigate]);
+
   const fetchProfile = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from("profiles")
       .select("*")

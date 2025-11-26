@@ -52,15 +52,18 @@ CREATE TABLE profiles (
   linkedin_url TEXT,
   whatsapp_number TEXT,
   bio TEXT,
-  india_phone TEXT,
-  india_state TEXT,
-  india_city TEXT,
-  india_pincode TEXT,
+  germany_phone TEXT,
+  germany_state TEXT,
+  germany_city TEXT,
+  germany_address TEXT,
+  germany_pincode TEXT,
+  ghana_address TEXT,
+  ghana_city TEXT,
   gender TEXT,
   marital_status TEXT,
   level_of_study TEXT,
   year_of_enrollment INTEGER,
-  expected_completion_year INTEGER,
+  expected_completion_year INTEGER, 
   year_of_study INTEGER,
   graduation_year INTEGER,
   date_of_birth DATE,
@@ -393,6 +396,10 @@ ALTER TABLE sponsors ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own profile"
   ON profiles FOR SELECT
   USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update their own profile"
   ON profiles FOR UPDATE
