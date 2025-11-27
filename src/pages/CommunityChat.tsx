@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, Users, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ChatMessage {
   id: string;
@@ -179,7 +180,7 @@ export default function CommunityChat() {
             <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
               {loading ? (
                 <div className="flex items-center justify-center h-32">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <LoadingSpinner size="sm" />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">

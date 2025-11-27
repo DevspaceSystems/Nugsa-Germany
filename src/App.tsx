@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import Layout from '@/components/layout/Layout';
+import { MaintenanceGuard } from '@/components/guards/MaintenanceGuard';
 
 // Lazy load all pages for better performance
 const Home = lazy(() => import("./pages/Home"));
@@ -41,7 +42,7 @@ const queryClient = new QueryClient({
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <LoadingSpinner size="md" className="mb-4" />
       <p className="text-muted-foreground">Loading...</p>
     </div>
   </div>
@@ -53,14 +54,14 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter >
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1">
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+            <MaintenanceGuard>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/admin-auth" element={<AdminAuth />} />
+                <Route element={<Layout />}>
                   <Route path="/" element={<Home />} />
-                  <Route path="/auth" element={<Auth />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/students" element={<Students />} />
                   <Route path="/announcements" element={<Announcements />} />
@@ -71,15 +72,13 @@ const App = () => (
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/about" element={<About />} />
                   {/* <Route path="/community-chat" element={<CommunityChat />} /> */}
-                  <Route path="/admin-auth" element={<AdminAuth />} />
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-          </div>
+                </Route>
+              </Routes>
+            </MaintenanceGuard>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

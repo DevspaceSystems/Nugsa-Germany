@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
@@ -13,6 +13,7 @@ import { Menu, X, User, LogOut, Settings, MessageSquare, ChevronDown } from "luc
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import type { Tables } from "@/integrations/supabase/types";
+import { NotificationManager } from "@/components/notifications/NotificationManager";
 
 type Profile = Tables<"profiles">;
 
@@ -32,7 +33,7 @@ export function Navbar() {
 
   const fetchUserProfile = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -80,9 +81,9 @@ export function Navbar() {
           <Link to="/" className="flex items-center space-x-3 group flex-shrink-0">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/10 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
-              <img 
-                src="/icon.png" 
-                alt="NUGSA-Germany Logo" 
+              <img
+                src="/icon.png"
+                alt="NUGSA-Germany Logo"
                 className="relative w-12 h-12 rounded-lg"
               />
             </div>
@@ -103,7 +104,7 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            
+
             {user ? (
               <>
                 <Link
@@ -113,11 +114,13 @@ export function Navbar() {
                   <MessageSquare className="w-4 h-4 inline mr-1" />
                   Messages
                 </Link>
-                
+
+                <NotificationManager />
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="ml-2 px-3 py-2 h-auto text-sm font-medium text-foreground hover:text-primary hover:bg-gray-50"
                     >
                       <User className="w-4 h-4 mr-2" />
@@ -189,7 +192,7 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            
+
             {user ? (
               <>
                 <Link

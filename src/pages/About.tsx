@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Download, Users, Award, FileText, Clock, Target, Heart, Globe, Lightbulb, Filter } from "lucide-react";
+import { Calendar, Download, Users, Award, FileText, Clock, Target, Heart, Globe, Lightbulb, Filter, Info, Quote, Scale, CheckCircle, BookOpen, Star, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type BoardMember = Tables<"board_members">;
@@ -147,7 +148,7 @@ export default function About() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <LoadingSpinner size="md" className="mb-4" />
           <p className="text-muted-foreground">Loading about information...</p>
         </div>
       </div>
@@ -158,50 +159,254 @@ export default function About() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 space-y-12">
         {/* Hero Section */}
-        <section className="text-center space-y-4">
-          <div className="flex items-center justify-center mb-4">
-            <img
-              src="/icon.png"
-              alt="NUGSA Logo"
-              className="w-16 h-16 rounded-full shadow"
-            />
+        <section className="space-y-8">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                <img
+                  src="/icon.png"
+                  alt="NUGSA Logo"
+                  className="w-24 h-24 rounded-full shadow-2xl relative z-10 border-4 border-white"
+                />
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">
+              NUGSA GERMANY
+            </h1>
+            <p className="text-xl text-muted-foreground font-light tracking-wide">
+              National Union of Ghanaian Student Associations
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-primary mb-3">
-            About NUGSA - Germany
-          </h1>
-          <p className="text-base text-muted-foreground max-w-3xl mx-auto">
-            The NATIONAL UNION OF GHANAIAN STUDENT ASSOCIATIONS (NUGSA) - GERMANY is a vibrant community connecting
-            Ghanaian scholars across Germany, fostering academic excellence, cultural preservation,
-            and professional networking.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-                <h3 className="text-sm font-semibold mb-1">Our Mission</h3>
-                <p className="text-xs text-muted-foreground">
-                  Empowering Ghanaian students in Germany through community support, academic excellence, and cultural preservation.
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border-none shadow-lg bg-gradient-to-br from-white to-blue-50/50 hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg text-primary">
+                  <Info className="w-5 h-5 mr-2" />
+                  Introduction
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  The National Union of Ghanaian Student Associations (NUGSA) Foundation is a Student-Led
+                  Autonomous and Non-Political, Non-Racial and Non-Religious umbrella organisation for
+                  Ghanaian Student, Scholars and Academics in the Diaspora.
                 </p>
               </CardContent>
             </Card>
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <Heart className="w-8 h-8 text-primary mx-auto mb-2" />
-                <h3 className="text-sm font-semibold mb-1">Our Values</h3>
-                <p className="text-xs text-muted-foreground">
-                  Unity, integrity, academic excellence, cultural pride, and mutual support among all members.
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-white to-red-50/50 hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg text-primary">
+                  <Quote className="w-5 h-5 mr-2" />
+                  Slogan & Emblem
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed italic">
+                  "Education: a right not a privilege"
+                  <br />
+                  "Unity, Freedom, Justice & Development"
                 </p>
               </CardContent>
             </Card>
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <Lightbulb className="w-8 h-8 text-primary mx-auto mb-2" />
-                <h3 className="text-sm font-semibold mb-1">Our Vision</h3>
-                <p className="text-xs text-muted-foreground">
-                  A thriving community of Ghanaian scholars making meaningful contributions to Ghana and Germany.
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-white to-yellow-50/50 hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg text-primary">
+                  <Scale className="w-5 h-5 mr-2" />
+                  Character
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  <li className="flex items-start text-sm text-muted-foreground">
+                    <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-500 shrink-0" />
+                    <span>Democratic & Non-partisan</span>
+                  </li>
+                  <li className="flex items-start text-sm text-muted-foreground">
+                    <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-500 shrink-0" />
+                    <span>Progressive Ideals</span>
+                  </li>
+                  <li className="flex items-start text-sm text-muted-foreground">
+                    <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-500 shrink-0" />
+                    <span>Respect for Rights</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <Card className="group border-none shadow-md hover:shadow-xl transition-all duration-300 bg-primary text-primary-foreground">
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <Target className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold">Our Mission</h3>
+                <p className="text-sm opacity-90 leading-relaxed">
+                  To Mobilise and Organise all Ghanaian Students, Scholars & Academics in the diaspora to engineer the Rebirth of our national vision.
                 </p>
               </CardContent>
             </Card>
+            <Card className="group border-none shadow-md hover:shadow-xl transition-all duration-300 bg-secondary text-secondary-foreground">
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <Heart className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold">Our Values</h3>
+                <p className="text-sm opacity-90 leading-relaxed">
+                  Unity, Freedom, Education, Inclusion, Respect and Development
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="group border-none shadow-md hover:shadow-xl transition-all duration-300 bg-accent text-accent-foreground">
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <Lightbulb className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold">Our Vision</h3>
+                <p className="text-sm opacity-90 leading-relaxed">
+                  For Ghana to be the Central Hub of Development in Africa.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Objectives Section */}
+        <section className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-primary mb-4">Our Objectives</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The core aims that drive our activities and initiatives across Germany
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
+              <CardContent className="p-6">
+                <div className="mb-4 text-blue-500">
+                  <Award className="w-8 h-8" />
+                </div>
+                <h3 className="font-semibold mb-2">Rights & Interests</h3>
+                <p className="text-sm text-muted-foreground">
+                  To champion and preserve the rights and interests of all Ghanaian students’ resident in Germany.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500 md:col-span-2 lg:col-span-2">
+              <CardContent className="p-6">
+                <div className="mb-4 text-green-500">
+                  <Users className="w-8 h-8" />
+                </div>
+                <h3 className="font-semibold mb-2">Common Platform</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                    <p className="text-sm text-muted-foreground">Deliberation of pertinent issues</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                    <p className="text-sm text-muted-foreground">Co-ordination of affairs</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                    <p className="text-sm text-muted-foreground">Free expression of opinions</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                    <p className="text-sm text-muted-foreground">Inculcating virtues & patriotism</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500">
+              <CardContent className="p-6">
+                <div className="mb-4 text-purple-500">
+                  <Globe className="w-8 h-8" />
+                </div>
+                <h3 className="font-semibold mb-2">International Relations</h3>
+                <p className="text-sm text-muted-foreground">
+                  To promote co-operation, understanding and friendship between Ghanaian students and others from diverse orientations.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-orange-500">
+              <CardContent className="p-6">
+                <div className="mb-4 text-orange-500">
+                  <BookOpen className="w-8 h-8" />
+                </div>
+                <h3 className="font-semibold mb-2">Cultural Heritage</h3>
+                <p className="text-sm text-muted-foreground">
+                  To inculcate discipline and revolutionary awareness of our cultural heritage and provide means to promote it.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-red-500">
+              <CardContent className="p-6">
+                <div className="mb-4 text-red-500">
+                  <Star className="w-8 h-8" />
+                </div>
+                <h3 className="font-semibold mb-2">Pan-Africanism</h3>
+                <p className="text-sm text-muted-foreground">
+                  To promote Pan-Africanism and foster unity among Ghanaian students and other students of African descent.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* 7 Pillars Section */}
+        <section className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-primary mb-4">The 7 Pillars</h2>
+            <p className="text-muted-foreground">Building a stronger community together</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[
+              "Build National Community & Join GUGS",
+              "Advocate & Promote Interests Globally",
+              "Enhance Academic & Professional Skills",
+              "Celebrate & Showcase Achievements",
+              "Educate World on Our Culture",
+              "Bridge for Development of Ghana",
+              "Facilitate Best Practice Sharing"
+            ].map((title, index) => {
+              const fullTexts = [
+                "To build the National Community of Ghanaian Students, Scholars & Academics and be part of the Global Union of Ghanaian Scholars (GUGS) Corporation.",
+                "To advocate, defend, and promote the interest of Ghanaian Students, Scholars & Academics globally.",
+                "To advance, develop, and enhance the academic and professional abilities, skills, and talents of Ghanaian Students, Scholars & Academics in the DIASPORA.",
+                "To celebrate, honour, and showcase the achievements of Ghanaian Students, Scholars & Academics.",
+                "To inform, introduce, and educate the world to our diverse, rich, and unique Culture.",
+                "To be the bridge between Ghanaian Students, Scholars, Academics, Institutions, and Organisations, towards the Development of Ghana.",
+                "To facilitate the sharing of best practice among Ghanaian Students, Scholars, Academics and Institutions globally."
+              ];
+
+              return (
+                <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-primary/10 hover:border-primary/30">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-5xl font-black text-primary/10 group-hover:text-primary/20 transition-colors">
+                        {index + 1}
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <Target className="w-4 h-4 text-primary" />
+                      </div>
+                    </div>
+                    <h4 className="font-bold text-sm mb-2 text-foreground/90">{title}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed flex-grow">
+                      {fullTexts[index]}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -250,7 +455,7 @@ export default function About() {
                   />
 
                   <Input
-                    placeholder="Filter by name e.g: Mark Febiri..."
+                    placeholder="Filter by name e.g: Paul Abrokwa..."
                     value={nameFilter}
                     onChange={(e) => setNameFilter(e.target.value)}
                     className="w-full sm:w-48"
@@ -277,11 +482,11 @@ export default function About() {
                     .map((member) => (
                       <Card key={member.id} className="group overflow-hidden hover:shadow-lg transition-all border rounded-lg">
                         {/* Image on Top */}
-                        <div className="relative aspect-video bg-muted overflow-hidden">
+                        <div className="relative aspect-square bg-muted overflow-hidden">
                           <img
                             src={member.image_url || "/lovable-uploads/6ed84001-cf9d-40a3-b68d-d2fcd378d51b.png"}
                             alt={member.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </div>
 
@@ -330,82 +535,6 @@ export default function About() {
 
         </section>
 
-        {/* Election Process Section */}
-        <section className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-primary mb-4">Democratic Election Process</h2>
-            <p className="text-lg text-muted-foreground">
-              Transparent and fair elections supervised by the Ghanaian Embassy
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card className="bg-white/90 backdrop-blur border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center">
-                  <Globe className="w-6 h-6 mr-2 text-primary" />
-                  Electoral Framework
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start space-x-3">
-                    <Users className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-semibold">Electoral Body</h3>
-                      <p className="text-sm text-muted-foreground">Independent electoral committee</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Award className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-semibold">Embassy Supervision</h3>
-                      <p className="text-sm text-muted-foreground">Ghanaian Embassy oversight</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <FileText className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-semibold">Voting Eligibility</h3>
-                      <p className="text-sm text-muted-foreground">Registered NUGSA members</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Calendar className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-semibold">Term Duration</h3>
-                      <p className="text-sm text-muted-foreground">1-year presidential mandate</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/90 backdrop-blur border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl">Election Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { phase: "Nomination Period", duration: "2 weeks for candidate registration", colorClass: "bg-emerald-500" },
-                    { phase: "Campaign Period", duration: "3 weeks for candidate campaigns", colorClass: "bg-amber-500" },
-                    { phase: "Voting Day", duration: "Digital voting platform", colorClass: "bg-rose-500" },
-                    { phase: "Results & Inauguration", duration: "Public announcement and ceremony", colorClass: "bg-slate-500" }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center space-x-4">
-                      <div className={`w-4 h-4 rounded-full ${item.colorClass} flex-shrink-0`}></div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.phase}</p>
-                        <p className="text-xs text-muted-foreground">{item.duration}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
 
         {/* Constitution Section */}
         <section className="space-y-8">
@@ -457,6 +586,22 @@ export default function About() {
             </CardContent>
           </Card>
 
+        </section>
+
+        {/* Closing Statement */}
+        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-8 md:p-12 text-center space-y-6 shadow-xl">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('/pattern.png')] opacity-10"></div>
+          <div className="relative z-10 space-y-4">
+            <Sparkles className="w-12 h-12 mx-auto text-yellow-300 animate-pulse" />
+            <p className="text-xl md:text-2xl font-medium leading-relaxed max-w-4xl mx-auto">
+              "There is only one Ghana, Our Ghana, the gateway to Africa - Our Homeland, and together, we shall make Ghana the <span className="font-bold text-yellow-300">“Central Hub of Africa’s Development”</span>."
+            </p>
+            <div className="pt-4">
+              <Badge variant="secondary" className="text-lg py-2 px-6 font-bold bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm">
+                #NUGSA - #Together4Ghana
+              </Badge>
+            </div>
+          </div>
         </section>
 
 

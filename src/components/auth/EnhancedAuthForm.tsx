@@ -26,7 +26,7 @@ export function EnhancedAuthForm() {
     password: "",
     firstName: "",
     lastName: "",
-    
+
     // Personal Information
     gender: "",
     maritalStatus: "",
@@ -34,7 +34,7 @@ export function EnhancedAuthForm() {
     ghanaMobileNumber: "",
     whatsappNumber: "",
     linkedinUrl: "",
-    
+
     // Academic Information
     levelOfStudy: "",
     university: "",
@@ -43,7 +43,7 @@ export function EnhancedAuthForm() {
     expectedCompletionYear: "",
     yearOfStudy: "",
     graduationYear: "",
-    
+
     // German Address
     germanyAddress: "",
     germanyCity: "",
@@ -80,7 +80,7 @@ export function EnhancedAuthForm() {
     hometown: "",
     bio: "",
   });
-  
+
   const [files, setFiles] = useState({
     passport: null as File | null,
     profilePicture: null as File | null,
@@ -134,13 +134,13 @@ export function EnhancedAuthForm() {
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(path, file);
-    
+
     if (error) throw error;
-    
+
     const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(path);
-    
+
     return urlData.publicUrl;
   };
 
@@ -203,7 +203,7 @@ export function EnhancedAuthForm() {
   // Effect to validate current step
   useEffect(() => {
     let isValid = false;
-    
+
     switch (currentStep) {
       case 1:
         isValid = validateStep1();
@@ -223,7 +223,7 @@ export function EnhancedAuthForm() {
       default:
         isValid = false;
     }
-    
+
     setIsStepValid(isValid);
   }, [currentStep, formData]);
 
@@ -270,6 +270,26 @@ export function EnhancedAuthForm() {
     try {
       console.log("1. Starting signup process");
 
+      // Check if registrations are allowed
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('platform_settings')
+        .select('setting_value')
+        .eq('setting_key', 'allow_registrations')
+        .single();
+
+      if (!settingsError && settingsData) {
+        const allowRegistrations = settingsData.setting_value === true || settingsData.setting_value === 'true';
+        if (!allowRegistrations) {
+          toast({
+            title: "Registrations Disabled",
+            description: "New user registrations are currently disabled. Please contact the administrator.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Step 1: Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -281,7 +301,7 @@ export function EnhancedAuthForm() {
 
       console.log("2. User created:", authData.user.id);
       console.log("2a. Session:", authData.session);
-      
+
       // Wait a moment for the session to be established
       if (!authData.session) {
         console.log("2b. No session yet, waiting...");
@@ -367,7 +387,7 @@ export function EnhancedAuthForm() {
       // we MUST use the RPC function which bypasses RLS
       console.log("3. Upserting profile using database function (no session, must use RPC)...");
       console.log("Profile data keys:", Object.keys(profileData));
-      
+
       // Convert profileData to JSONB format for the function
       // Remove undefined values and convert to proper types
       const cleanProfileData: any = {};
@@ -377,9 +397,9 @@ export function EnhancedAuthForm() {
           cleanProfileData[key] = value;
         }
       });
-      
+
       console.log("3a. Cleaned profile data:", cleanProfileData);
-      
+
       // Call RPC function - this MUST work since it bypasses RLS
       const { data: rpcData, error: upsertError } = await supabase.rpc('upsert_user_profile', {
         profile_data: cleanProfileData
@@ -388,11 +408,11 @@ export function EnhancedAuthForm() {
       if (upsertError) {
         console.error("4. RPC failed:", upsertError);
         console.error("Error details:", JSON.stringify(upsertError, null, 2));
-        
+
         // If RPC fails, we can't use direct insert/update without a session
         // The profile will be created by the trigger, user can complete it after email confirmation
         console.warn("5. Profile will be created by trigger. User can complete profile after email confirmation.");
-        
+
         // Don't throw error - let the trigger handle basic profile creation
         // The user can complete their profile after confirming their email
       } else {
@@ -401,8 +421,8 @@ export function EnhancedAuthForm() {
 
       toast({
         title: "Sign up successful!",
-        description: authData.session 
-          ? "Your account has been created with complete profile." 
+        description: authData.session
+          ? "Your account has been created with complete profile."
           : "Please check your email to confirm your account before signing in.",
       });
 
@@ -433,7 +453,7 @@ export function EnhancedAuthForm() {
 
       if (error) {
         console.error("Sign in error:", error);
-        
+
         // Provide more helpful error messages
         let errorMessage = error.message;
         if (error.message?.includes('email') || error.message?.includes('Email')) {
@@ -443,7 +463,7 @@ export function EnhancedAuthForm() {
         } else if (error.status === 400) {
           errorMessage = "Please confirm your email address before signing in. Check your inbox for the confirmation link.";
         }
-        
+
         toast({
           title: "Sign in failed",
           description: errorMessage,
@@ -472,9 +492,9 @@ export function EnhancedAuthForm() {
         <Card className="w-full max-w-md border border-gray-200 shadow-sm">
           <CardHeader className="text-center space-y-2">
             <div className="mx-auto mb-2">
-              <img 
-                src="/icon.png" 
-              alt="NUGSA Logo" 
+              <img
+                src="/icon.png"
+                alt="NUGSA Logo"
                 className="w-16 h-16 mx-auto"
               />
             </div>
@@ -495,18 +515,18 @@ export function EnhancedAuthForm() {
                   className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium" 
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send reset link
               </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full text-gray-600 hover:text-gray-800" 
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full text-gray-600 hover:text-gray-800"
                 onClick={() => setShowForgotPassword(false)}
               >
                 Back to sign in
@@ -522,9 +542,9 @@ export function EnhancedAuthForm() {
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
-          <img 
-            src="/icon.png" 
-            alt="NUGSA Logo" 
+          <img
+            src="/icon.png"
+            alt="NUGSA Logo"
             className="w-20 h-20 mx-auto mb-4"
           />
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">NUGSA - Germany Student Platform</h1>
@@ -535,14 +555,14 @@ export function EnhancedAuthForm() {
           <CardHeader className="border-b border-gray-200 pb-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-transparent p-0">
-                <TabsTrigger 
-                  value="signin" 
+                <TabsTrigger
+                  value="signin"
                   className="data-[state=active]:bg-transparent data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none border-b-2 border-transparent py-3 text-gray-600 data-[state=active]:font-semibold"
                 >
                   Sign in
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="signup" 
+                <TabsTrigger
+                  value="signup"
                   className="data-[state=active]:bg-transparent data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none border-b-2 border-transparent py-3 text-gray-600 data-[state=active]:font-semibold"
                 >
                   Sign up
@@ -550,10 +570,10 @@ export function EnhancedAuthForm() {
               </TabsList>
             </Tabs>
           </CardHeader>
-          
+
           <CardContent className="pt-6">
             <Tabs value={activeTab} className="w-full">
-              
+
               {/* Sign In Tab */}
               <TabsContent value="signin" className="space-y-4 m-0">
                 <form onSubmit={handleSignIn} className="space-y-4">
@@ -602,16 +622,16 @@ export function EnhancedAuthForm() {
                       </button>
                     </div>
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium" 
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
                     disabled={isLoading}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign in
                   </Button>
                 </form>
-                
+
                 <div className="text-center text-sm text-gray-600">
                   No account?{" "}
                   <button
@@ -634,8 +654,8 @@ export function EnhancedAuthForm() {
                       <span className="text-sm text-gray-500">{Math.round((currentStep / totalSteps) * 100)}% complete</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(currentStep / totalSteps) * 100}%` }}
                       ></div>
                     </div>
@@ -670,7 +690,7 @@ export function EnhancedAuthForm() {
                           />
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">Email *</Label>
@@ -718,8 +738,8 @@ export function EnhancedAuthForm() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="gender" className="text-sm font-medium text-gray-700">Gender *</Label>
-                          <Select 
-                            value={formData.gender} 
+                          <Select
+                            value={formData.gender}
                             onValueChange={(value) => handleInputChange("gender", value)}
                             required
                           >
@@ -736,8 +756,8 @@ export function EnhancedAuthForm() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="maritalStatus" className="text-sm font-medium text-gray-700">Marital status *</Label>
-                          <Select 
-                            value={formData.maritalStatus} 
+                          <Select
+                            value={formData.maritalStatus}
                             onValueChange={(value) => handleInputChange("maritalStatus", value)}
                             required
                           >
@@ -767,9 +787,9 @@ export function EnhancedAuthForm() {
                           />
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-3 gap-4">
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="germanyPhone" className="text-sm font-medium text-gray-700">Germany phone *</Label>
                           <Input
@@ -831,8 +851,8 @@ export function EnhancedAuthForm() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="levelOfStudy" className="text-sm font-medium text-gray-700">Level of study *</Label>
-                          <Select 
-                            value={formData.levelOfStudy} 
+                          <Select
+                            value={formData.levelOfStudy}
                             onValueChange={(value) => handleInputChange("levelOfStudy", value)}
                             required
                           >
@@ -859,7 +879,7 @@ export function EnhancedAuthForm() {
                           />
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-4 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="major" className="text-sm font-medium text-gray-700">Major/Course *</Label>
@@ -898,8 +918,8 @@ export function EnhancedAuthForm() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="yearOfStudy" className="text-sm font-medium text-gray-700">Current year *</Label>
-                          <Select 
-                            value={formData.yearOfStudy} 
+                          <Select
+                            value={formData.yearOfStudy}
                             onValueChange={(value) => handleInputChange("yearOfStudy", value)}
                             required
                           >
@@ -926,7 +946,7 @@ export function EnhancedAuthForm() {
                         <MapPin className="w-5 h-5" />
                         Address Information
                       </h3>
-                      
+
                       {/* German Address */}
                       <div className="space-y-4">
                         <h4 className="font-medium text-gray-700">German Address *</h4>
@@ -1183,7 +1203,7 @@ export function EnhancedAuthForm() {
                     ) : (
                       <div></div>
                     )}
-                    
+
                     {currentStep < totalSteps ? (
                       <Button
                         type="button"
@@ -1195,9 +1215,9 @@ export function EnhancedAuthForm() {
                         <ChevronLeft className="w-4 h-4 ml-2 rotate-180" />
                       </Button>
                     ) : (
-                      <Button 
-                        type="submit" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium" 
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
                         disabled={isLoading || !isStepValid}
                       >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

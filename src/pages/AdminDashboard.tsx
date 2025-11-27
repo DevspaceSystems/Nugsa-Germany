@@ -34,6 +34,7 @@ import { toast } from "@/hooks/use-toast";
 import { VerificationModule } from "@/components/admin/VerificationModule";
 import { HeroSlideshowManager } from "@/components/admin/HeroSlideshowManager";
 import { StudentDetailModal } from "@/components/admin/StudentDetailModal";
+import { PlatformSettings } from "@/components/admin/PlatformSettings";
 import {
   Users,
   FileText,
@@ -2109,7 +2110,7 @@ export default function AdminDashboard() {
             { id: "assistance", label: "Assistance Requests", icon: Settings },
             { id: "finance", label: "Finance", icon: DollarSign },
             { id: "hero", label: "Hero Images", icon: Calendar },
-            { id: "settings", label: "Settings", icon: Settings }
+            { id: "platform", label: "Platform Settings", icon: Settings }
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -2135,7 +2136,7 @@ export default function AdminDashboard() {
           {activeTab === "assistance" && renderAssistanceRequestsTab()}
           {activeTab === "finance" && renderFinanceTab()}
           {activeTab === "hero" && <HeroSlideshowManager />}
-          {activeTab === "settings" && renderSettingsTab()}
+          {activeTab === "platform" && <PlatformSettings />}
         </div>
 
         {/* Student Detail Modal */}
