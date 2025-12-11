@@ -1,0 +1,81 @@
+{
+    "nav": {
+        "home": "Startseite",
+        "about": "Über uns",
+        "chapters": "Kapitel",
+        "announcements": "Ankündigungen",
+        "gallery": "Galerie",
+        "contact": "Kontakt",
+        "dashboard": "Dashboard",
+        "adminDashboard": "Admin-Dashboard",
+        "profile": "Profil",
+        "logout": "Abmelden",
+        "login": "Anmelden"
+    },
+    "buttons": {
+        "readMore": "Mehr lesen",
+        "viewAll": "Alle anzeigen",
+        "submit": "Absenden",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "close": "Schließen",
+        "back": "Zurück",
+        "next": "Weiter",
+        "previous": "Vorherige",
+        "search": "Suchen",
+        "filter": "Filtern",
+        "download": "Herunterladen",
+        "upload": "Hochladen",
+        "send": "Senden",
+        "apply": "Anwenden",
+        "reset": "Zurücksetzen"
+    },
+    "common": {
+        "loading": "Wird geladen...",
+        "error": "Fehler",
+        "success": "Erfolg",
+        "warning": "Warnung",
+        "info": "Information",
+        "noData": "Keine Daten verfügbar",
+        "noResults": "Keine Ergebnisse gefunden",
+        "tryAgain": "Erneut versuchen",
+        "or": "oder",
+        "and": "und",
+        "all": "Alle",
+        "none": "Keine",
+        "yes": "Ja",
+        "no": "Nein",
+        "optional": "Optional",
+        "required": "Erforderlich"
+    },
+    "footer": {
+        "quickLinks": "Schnelllinks",
+        "followUs": "Folgen Sie uns",
+        "contact": "Kontaktieren Sie uns",
+        "allRightsReserved": "Alle Rechte vorbehalten",
+        "privacyPolicy": "Datenschutzrichtlinie",
+        "termsOfService": "Nutzungsbedingungen"
+    },
+    "language": {
+        "english": "Englisch",
+        "german": "Deutsch",
+        "selectLanguage": "Sprache wählen"
+    },
+    "time": {
+        "justNow": "Gerade eben",
+        "minutesAgo": "vor {{count}} Minute",
+        "minutesAgo_other": "vor {{count}} Minuten",
+        "hoursAgo": "vor {{count}} Stunde",
+        "hoursAgo_other": "vor {{count}} Stunden",
+        "daysAgo": "vor {{count}} Tag",
+        "daysAgo_other": "vor {{count}} Tagen",
+        "weeksAgo": "vor {{count}} Woche",
+        "weeksAgo_other": "vor {{count}} Wochen",
+        "monthsAgo": "vor {{count}} Monat",
+        "monthsAgo_other": "vor {{count}} Monaten",
+        "yearsAgo": "vor {{count}} Jahr",
+        "yearsAgo_other": "vor {{count}} Jahren"
+    }
+}

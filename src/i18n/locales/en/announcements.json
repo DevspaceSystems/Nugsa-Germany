@@ -1,0 +1,27 @@
+{
+    "title": "Announcements & News",
+    "subtitle": "Stay updated with the latest news and announcements from NUGSA Germany",
+    "filters": {
+        "search": "Search announcements...",
+        "allCategories": "All Categories",
+        "sortBy": "Sort by",
+        "newest": "Newest First",
+        "oldest": "Oldest First"
+    },
+    "categories": {
+        "general": "General",
+        "event": "Event",
+        "academic": "Academic",
+        "cultural": "Cultural",
+        "urgent": "Urgent"
+    },
+    "card": {
+        "readMore": "Read More",
+        "postedBy": "Posted by",
+        "views": "views"
+    },
+    "noAnnouncements": {
+        "title": "No announcements found",
+        "description": "Check back later for updates"
+    }
+}

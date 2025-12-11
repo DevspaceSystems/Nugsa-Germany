@@ -300,7 +300,7 @@ export function PlatformSettings() {
                                 <li>• User Profiles & Accounts</li>
                                 <li>• Community & Private Messages</li>
                                 <li>• Announcements & News</li>
-                                <li>• Board Members & Leadership</li>
+                                <li>• Board Members & Executives</li>
                                 <li>• Assistance Requests</li>
                                 <li>• Contact Inquiries</li>
                                 <li>• Admin Approvals</li>

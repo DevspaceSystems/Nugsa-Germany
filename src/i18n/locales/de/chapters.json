@@ -1,0 +1,36 @@
+{
+    "title": "NUGSA Kapitel in ganz Deutschland",
+    "subtitle": "Verbinden Sie sich mit Ihrem lokalen Kapitel und treten Sie einer lebendigen Gemeinschaft ghanaischer Studenten in ganz Deutschland bei",
+    "stats": {
+        "activeChapters": "Aktive Kapitel",
+        "totalMembers": "Gesamtmitglieder",
+        "recentActivities": "Aktuelle Aktivitäten"
+    },
+    "search": {
+        "placeholder": "Kapitel nach Name, Stadt oder Beschreibung suchen...",
+        "filterByRegion": "Nach Region filtern",
+        "allRegions": "Alle Regionen"
+    },
+    "card": {
+        "members": "Mitglieder",
+        "established": "Gegr.",
+        "meetingSchedule": "Besprechungsplan",
+        "chapterExecutives": "Kapitel-Führungskräfte",
+        "more": "mehr",
+        "showLess": "Weniger anzeigen",
+        "viewExecutives": "Führungskräfte & Aktivitäten anzeigen",
+        "executiveTeam": "Führungsteam",
+        "recentActivities": "Aktuelle Aktivitäten",
+        "contact": "Kontakt",
+        "attendees": "Teilnehmer"
+    },
+    "noChapters": {
+        "title": "Keine Kapitel gefunden",
+        "description": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen"
+    },
+    "cta": {
+        "title": "Möchten Sie ein Kapitel in Ihrer Stadt gründen?",
+        "description": "Wir sind immer auf der Suche nach Möglichkeiten, unsere Präsenz in ganz Deutschland zu erweitern. Wenn Sie daran interessiert sind, ein NUGSA-Kapitel in Ihrer Stadt zu gründen, würden wir uns freuen, von Ihnen zu hören!",
+        "getInTouch": "Kontakt aufnehmen"
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "hero": {
+        "welcome": "Willkommen bei NUGSA Deutschland",
+        "subtitle": "Stärkung ghanaischer Studenten in ganz Deutschland",
+        "description": "Treten Sie einer lebendigen Gemeinschaft ghanaischer Studenten, Wissenschaftler und Akademiker bei, die sich der akademischen Exzellenz, der Bewahrung der Kultur und der nationalen Entwicklung widmen.",
+        "joinCommunity": "Unserer Gemeinschaft beitreten",
+        "learnMore": "Mehr erfahren"
+    },
+    "stats": {
+        "members": "Aktive Mitglieder",
+        "chapters": "Kapitel",
+        "events": "Veranstaltungen dieses Jahr",
+        "years": "Jahre Exzellenz"
+    },
+    "features": {
+        "title": "Was wir bieten",
+        "community": {
+            "title": "Starke Gemeinschaft",
+            "description": "Vernetzen Sie sich mit ghanaischen Studenten in ganz Deutschland"
+        },
+        "support": {
+            "title": "Akademische Unterstützung",
+            "description": "Zugang zu Ressourcen und Mentoring für Ihre akademische Reise"
+        },
+        "culture": {
+            "title": "Kulturelle Veranstaltungen",
+            "description": "Feiern und bewahren Sie unser reiches ghanaisches Erbe"
+        },
+        "networking": {
+            "title": "Berufliches Netzwerk",
+            "description": "Bauen Sie Verbindungen für Ihre zukünftige Karriere auf"
+        }
+    },
+    "announcements": {
+        "title": "Neueste Ankündigungen",
+        "viewAll": "Alle Ankündigungen anzeigen"
+    },
+    "cta": {
+        "title": "Bereit mitzumachen?",
+        "description": "Treten Sie NUGSA Deutschland heute bei und werden Sie Teil von etwas Größerem",
+        "getStarted": "Loslegen"
+    }
+}

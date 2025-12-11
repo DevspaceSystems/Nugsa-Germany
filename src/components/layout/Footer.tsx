@@ -1,9 +1,11 @@
-import { Mail, MapPin, Phone, Linkedin, Facebook, Twitter } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Facebook, Video } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  
+  const { t } = useTranslation('common');
+
   return (
     <footer className="bg-gray-900 text-white border-t border-gray-800">
       <div className="section-container section-padding">
@@ -11,9 +13,9 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
-              <img 
-                src="/icon.png" 
-                alt="NUGSA-Germany Logo" 
+              <img
+                src="/icon.png"
+                alt="NUGSA-Germany Logo"
                 className="w-12 h-12 rounded-lg"
               />
               <div>
@@ -22,47 +24,47 @@ export function Footer() {
               </div>
             </div>
             <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
-              Empowering Ghanaian students across Germany through community, support, and academic excellence. 
+              Empowering Ghanaian students across Germany through community, support, and academic excellence.
               Building bridges between cultures and fostering professional growth.
             </p>
             <div className="flex items-center space-x-4">
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/nugsagermany?igsh=MWNrYjFpYWdiNHZrNQ=="
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-primary flex items-center justify-center transition-colors"
-                aria-label="LinkedIn"
+                aria-label="Instagram"
               >
-                <Linkedin className="w-5 h-5" />
+                <Instagram className="w-5 h-5" />
               </a>
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/groups/716219789172147/?ref=share"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-primary flex items-center justify-center transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
+              <a
+                href="https://www.tiktok.com/@nugsagermany?_r=1&_t=ZN-91se3sn72o7"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-primary flex items-center justify-center transition-colors"
-                aria-label="Twitter"
+                aria-label="TikTok"
               >
-                <Twitter className="w-5 h-5" />
+                <Video className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-white">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-6 text-white">{t('footer.quickLinks')}</h4>
             <ul className="space-y-3">
               <li>
                 <Link to="/about" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  About Us
+                  {t('nav.about')}
                 </Link>
               </li>
               <li>
@@ -72,7 +74,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/announcements" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Announcements
+                  {t('nav.announcements')}
                 </Link>
               </li>
               <li>
@@ -90,7 +92,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-white">Contact</h4>
+            <h4 className="text-lg font-semibold mb-6 text-white">{t('footer.contact')}</h4>
             <ul className="space-y-4">
               <li className="flex items-start space-x-3">
                 <Mail className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -106,16 +108,16 @@ export function Footer() {
                 <div>
                   <p className="text-sm text-gray-400">Location</p>
                   <p className="text-gray-300 text-sm">Germany</p>
-              </div>
+                </div>
               </li>
               <li className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-400">Support</p>
                   <Link to="/contact" className="text-gray-300 hover:text-white transition-colors text-sm">
-                    Contact Us
+                    {t('nav.contact')}
                   </Link>
-            </div>
+                </div>
               </li>
             </ul>
           </div>
@@ -125,14 +127,14 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm text-center md:text-left">
-              © {currentYear} <span className="text-white font-semibold">NUGSA-Germany</span>. All rights reserved.
+              © {currentYear} <span className="text-white font-semibold">NUGSA-Germany</span>. {t('footer.allRightsReserved')}.
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">
               <Link to="/about" className="hover:text-white transition-colors">
-                Privacy Policy
+                {t('footer.privacyPolicy')}
               </Link>
               <Link to="/about" className="hover:text-white transition-colors">
-                Terms of Service
+                {t('footer.termsOfService')}
               </Link>
             </div>
           </div>

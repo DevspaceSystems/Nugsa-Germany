@@ -1,0 +1,27 @@
+{
+    "title": "Ankündigungen & Neuigkeiten",
+    "subtitle": "Bleiben Sie auf dem Laufenden mit den neuesten Nachrichten und Ankündigungen von NUGSA Deutschland",
+    "filters": {
+        "search": "Ankündigungen durchsuchen...",
+        "allCategories": "Alle Kategorien",
+        "sortBy": "Sortieren nach",
+        "newest": "Neueste zuerst",
+        "oldest": "Älteste zuerst"
+    },
+    "categories": {
+        "general": "Allgemein",
+        "event": "Veranstaltung",
+        "academic": "Akademisch",
+        "cultural": "Kulturell",
+        "urgent": "Dringend"
+    },
+    "card": {
+        "readMore": "Mehr lesen",
+        "postedBy": "Veröffentlicht von",
+        "views": "Aufrufe"
+    },
+    "noAnnouncements": {
+        "title": "Keine Ankündigungen gefunden",
+        "description": "Schauen Sie später nach Updates"
+    }
+}

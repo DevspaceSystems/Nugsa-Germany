@@ -1,0 +1,43 @@
+{
+    "hero": {
+        "welcome": "Welcome to NUGSA Germany",
+        "subtitle": "Empowering Ghanaian Students Across Germany",
+        "description": "Join a vibrant community of Ghanaian students, scholars, and academics dedicated to academic excellence, cultural preservation, and national development.",
+        "joinCommunity": "Join Our Community",
+        "learnMore": "Learn More"
+    },
+    "stats": {
+        "members": "Active Members",
+        "chapters": "Chapters",
+        "events": "Events This Year",
+        "years": "Years of Excellence"
+    },
+    "features": {
+        "title": "What We Offer",
+        "community": {
+            "title": "Strong Community",
+            "description": "Connect with fellow Ghanaian students across Germany"
+        },
+        "support": {
+            "title": "Academic Support",
+            "description": "Access resources and mentorship for your academic journey"
+        },
+        "culture": {
+            "title": "Cultural Events",
+            "description": "Celebrate and preserve our rich Ghanaian heritage"
+        },
+        "networking": {
+            "title": "Professional Network",
+            "description": "Build connections for your future career"
+        }
+    },
+    "announcements": {
+        "title": "Latest Announcements",
+        "viewAll": "View All Announcements"
+    },
+    "cta": {
+        "title": "Ready to Get Involved?",
+        "description": "Join NUGSA Germany today and be part of something bigger",
+        "getStarted": "Get Started"
+    }
+}

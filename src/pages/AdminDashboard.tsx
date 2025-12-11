@@ -35,6 +35,8 @@ import { VerificationModule } from "@/components/admin/VerificationModule";
 import { HeroSlideshowManager } from "@/components/admin/HeroSlideshowManager";
 import { StudentDetailModal } from "@/components/admin/StudentDetailModal";
 import { PlatformSettings } from "@/components/admin/PlatformSettings";
+import { GalleryManager } from "@/components/admin/GalleryManager";
+import { ChapterManager } from "@/components/admin/ChapterManager";
 import {
   Users,
   FileText,
@@ -59,7 +61,9 @@ import {
   UserX,
   Send,
   Smartphone,
-  Search
+  Search,
+  Image as ImageIcon,
+  Building2
 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -174,6 +178,9 @@ export default function AdminDashboard() {
     pendingInquiries: 0
   });
 
+  // Chapter Management State
+  const [managedChapterId, setManagedChapterId] = useState<string | null>(null);
+
   // Board Members State
   const [boardMembers, setBoardMembers] = useState<BoardMember[]>([]);
   const [yearFilter, setYearFilter] = useState("2024-2025");
@@ -260,29 +267,44 @@ export default function AdminDashboard() {
     if (!user) return;
 
     try {
-      const { data: profile, error } = await supabase
+      const { data: profileData, error } = await supabase
         .from("profiles")
-        .select("role, is_verified")
+        .select("role, is_verified, managed_chapter_id" as any)
         .eq("id", user.id)
         .single();
 
       if (error) throw error;
 
-      if (profile?.role !== "admin" || !profile?.is_verified) {
+      const profile = profileData as any;
+
+      const isGlobalAdmin = profile?.role === "admin" && profile?.is_verified;
+      const isChapterLead = !!profile?.managed_chapter_id;
+
+      if (!isGlobalAdmin && !isChapterLead) {
         setAccessDenied(true);
         setUserRole(profile?.role);
         setIsVerified(profile?.is_verified);
         return;
       }
 
-      // User is admin, fetch data
+      setManagedChapterId((profile as any).managed_chapter_id);
+
+      // If only chapter lead, set explicit tab
+      if (isChapterLead && !isGlobalAdmin) {
+        setActiveTab("chapters");
+      }
+
+      // Fetch data
       fetchStats();
-      fetchBoardMembers();
-      fetchConstitutionDocs();
-      fetchAnnouncements();
-      fetchContactInquiries();
-      fetchAssistanceRequests();
-      fetchFinanceSettings();
+      // Only fetch global data if global admin
+      if (isGlobalAdmin) {
+        fetchBoardMembers();
+        fetchConstitutionDocs();
+        fetchAnnouncements();
+        fetchContactInquiries();
+        fetchAssistanceRequests();
+        fetchFinanceSettings();
+      }
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast({
@@ -2102,39 +2124,45 @@ export default function AdminDashboard() {
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8 border-b">
           {[
-            { id: "verification", label: "Verification", icon: UserCheck },
-            { id: "board", label: "Board Members", icon: Users },
-            { id: "constitution", label: "Constitution", icon: FileText },
-            { id: "announcements", label: "Announcements", icon: Bell },
-            { id: "inquiries", label: "Contact Inquiries", icon: Mail },
-            { id: "assistance", label: "Assistance Requests", icon: Settings },
-            { id: "finance", label: "Finance", icon: DollarSign },
-            { id: "hero", label: "Hero Images", icon: Calendar },
-            { id: "platform", label: "Platform Settings", icon: Settings }
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center px-4 py-2 rounded-t-lg font-medium transition-colors ${activeTab === id
-                ? "bg-primary text-primary-foreground border-b-2 border-primary"
-                : "text-muted-foreground hover:text-primary"
-                }`}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              {label}
-            </button>
-          ))}
+            { id: "verification", label: "Verification", icon: UserCheck, adminOnly: true },
+            { id: "chapters", label: "Chapter Management", icon: Building2, adminOnly: false },
+            { id: "board", label: "Board Members", icon: Users, adminOnly: true },
+            { id: "constitution", label: "Constitution", icon: FileText, adminOnly: true },
+            { id: "announcements", label: "Announcements", icon: Bell, adminOnly: true },
+            { id: "inquiries", label: "Contact Inquiries", icon: Mail, adminOnly: true },
+            { id: "assistance", label: "Assistance", icon: Settings, adminOnly: true },
+            { id: "finance", label: "Finance", icon: DollarSign, adminOnly: true },
+            { id: "gallery", label: "Gallery", icon: ImageIcon, adminOnly: true },
+            { id: "hero", label: "Hero Images", icon: Calendar, adminOnly: true },
+            { id: "platform", label: "Settings", icon: Settings, adminOnly: true }
+          ]
+            .filter(tab => !managedChapterId || !tab.adminOnly) // If chapter lead, only show non-adminOnly tabs
+            .map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center px-4 py-2 rounded-t-lg font-medium transition-colors ${activeTab === id
+                  ? "bg-primary text-primary-foreground border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-primary"
+                  }`}
+              >
+                <Icon className="w-4 h-4 mr-2" />
+                {label}
+              </button>
+            ))}
         </div>
 
         {/* Tab Content */}
         <div className="space-y-6">
           {activeTab === "verification" && <VerificationModule onStatsUpdate={fetchStats} />}
+          {activeTab === "chapters" && <ChapterManager managedChapterId={managedChapterId} />}
           {activeTab === "board" && renderBoardMembersTab()}
           {activeTab === "constitution" && renderConstitutionTab()}
           {activeTab === "announcements" && renderAnnouncementsTab()}
           {activeTab === "inquiries" && renderContactInquiriesTab()}
           {activeTab === "assistance" && renderAssistanceRequestsTab()}
           {activeTab === "finance" && renderFinanceTab()}
+          {activeTab === "gallery" && <GalleryManager />}
           {activeTab === "hero" && <HeroSlideshowManager />}
           {activeTab === "platform" && <PlatformSettings />}
         </div>

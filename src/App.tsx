@@ -23,6 +23,8 @@ const Messages = lazy(() => import("./pages/Messages"));
 const AdminAuth = lazy(() => import("./pages/AdminAuth"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const About = lazy(() => import("./pages/About"));
+const Chapters = lazy(() => import("./pages/Chapters"));
+const Gallery = lazy(() => import("./pages/Gallery"));
 const CommunityChat = lazy(() => import("./pages/CommunityChat"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -71,6 +73,8 @@ const App = () => (
                   <Route path="/assistance" element={<Assistance />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/chapters" element={<Chapters />} />
+                  <Route path="/gallery" element={<Gallery />} />
                   {/* <Route path="/community-chat" element={<CommunityChat />} /> */}
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

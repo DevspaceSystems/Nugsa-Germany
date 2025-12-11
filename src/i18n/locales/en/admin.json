@@ -1,0 +1,30 @@
+{
+    "dashboard": {
+        "title": "Admin Dashboard",
+        "welcome": "Welcome back",
+        "overview": "Overview"
+    },
+    "tabs": {
+        "announcements": "Announcements",
+        "boardMembers": "Board Members",
+        "chapters": "Chapters",
+        "gallery": "Gallery",
+        "settings": "Settings",
+        "users": "Users"
+    },
+    "actions": {
+        "add": "Add New",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save Changes",
+        "cancel": "Cancel",
+        "publish": "Publish",
+        "draft": "Save as Draft"
+    },
+    "messages": {
+        "saveSuccess": "Changes saved successfully",
+        "deleteSuccess": "Deleted successfully",
+        "error": "An error occurred",
+        "confirmDelete": "Are you sure you want to delete this item?"
+    }
+}

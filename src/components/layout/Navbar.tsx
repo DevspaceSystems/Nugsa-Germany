@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +24,7 @@ export function Navbar() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     if (user) {
@@ -51,27 +54,62 @@ export function Navbar() {
   };
 
   const getDashboardLink = () => {
-    if (userProfile?.role === 'admin' && userProfile?.is_verified) {
+    if ((userProfile?.role === 'admin' && userProfile?.is_verified) || (userProfile as any)?.managed_chapter_id) {
       return "/admin-dashboard";
     }
     return "/dashboard";
   };
 
-  const navLinks = user ? [
-    { label: "Home", path: "/" },
-    { label: "Dashboard", path: getDashboardLink() },
-    { label: "Directory", path: "/students" },
-    { label: "Announcements", path: "/announcements" },
-    { label: "Support", path: "/support" },
-    { label: "About", path: "/about" },
-  ] : [
-    { label: "Home", path: "/" },
-    { label: "About", path: "/about" },
-    { label: "Directory", path: "/students" },
-    { label: "Announcements", path: "/announcements" },
-    { label: "Support", path: "/support" },
-    { label: "Contact", path: "/contact" },
-  ];
+  /* Navigation Data Structure */
+  const getNavStructure = () => {
+    const communityItems = [
+      { label: t('nav.chapters'), path: "/chapters" },
+      { label: t('nav.gallery'), path: "/gallery" },
+      { label: "Directory", path: "/students" },
+      { label: t('nav.announcements'), path: "/announcements" },
+    ];
+
+    const canAccessAdmin = (userProfile?.role === 'admin' && userProfile?.is_verified) || (userProfile as any)?.managed_chapter_id;
+
+    if (user) {
+      return [
+        { label: t('nav.home'), path: "/" },
+        { label: t('nav.about'), path: "/about" },
+        // Show Dashboard link if admin or chapter lead, otherwise it's user dashboard which is also valid but maybe distinct?
+        // Actually getDashboardLink() returns /admin-dashboard OR /dashboard.
+        // So we always show "Dashboard" but the destination changes.
+        { label: t('nav.dashboard'), path: getDashboardLink() },
+        {
+          label: "Community",
+          type: "dropdown",
+          items: communityItems
+        },
+        { label: "Support", path: "/support" },
+      ];
+    }
+
+    return [
+      { label: t('nav.home'), path: "/" },
+      { label: t('nav.about'), path: "/about" },
+      {
+        label: "Community",
+        type: "dropdown",
+        items: communityItems
+      },
+      { label: "Support", path: "/support" },
+      { label: t('nav.contact'), path: "/contact" },
+    ];
+  };
+
+  const navItems = getNavStructure();
+
+  // Helper for mobile menu to flatten the structure
+  const mobileNavLinks = navItems.reduce((acc: any[], item: any) => {
+    if (item.type === "dropdown") {
+      return [...acc, ...item.items];
+    }
+    return [...acc, item];
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm backdrop-blur-sm bg-white/95">
@@ -95,15 +133,37 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 flex-shrink-0 overflow-x-auto">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded-md whitespace-nowrap flex-shrink-0"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navItems.map((item: any) => {
+              if (item.type === "dropdown") {
+                return (
+                  <DropdownMenu key={item.label}>
+                    <DropdownMenuTrigger className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded-md whitespace-nowrap flex items-center gap-1 focus:outline-none">
+                      {item.label}
+                      <ChevronDown className="w-3 h-3 opacity-50" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-48">
+                      {item.items.map((subItem: any) => (
+                        <DropdownMenuItem key={subItem.path} asChild>
+                          <Link to={subItem.path} className="w-full cursor-pointer">
+                            {subItem.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded-md whitespace-nowrap flex-shrink-0"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             {user ? (
               <>
@@ -116,6 +176,7 @@ export function Navbar() {
                 </Link>
 
                 <NotificationManager />
+                <LanguageSwitcher />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -139,21 +200,22 @@ export function Navbar() {
                     </div>
                     <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
                       <Settings className="w-4 h-4 mr-2" />
-                      Profile Settings
+                      {t('nav.profile')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t('nav.logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
             ) : (
               <div className="ml-4 flex items-center space-x-3">
+                <LanguageSwitcher />
                 <Link to="/auth">
                   <Button variant="ghost" className="text-sm font-medium">
-                    Sign In
+                    {t('nav.login')}
                   </Button>
                 </Link>
                 <Link to="/auth">
@@ -182,7 +244,7 @@ export function Navbar() {
       {isOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-4 pt-2 pb-4 space-y-1">
-            {navLinks.map((link) => (
+            {mobileNavLinks.map((link: any) => (
               <Link
                 key={link.path}
                 to={link.path}

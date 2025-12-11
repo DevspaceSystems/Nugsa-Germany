@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, memo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -198,6 +199,7 @@ export default function Announcements() {
   const [isDialogPlaying, setIsDialogPlaying] = useState(false);
   const [isDialogMuted, setIsDialogMuted] = useState(true);
   const dialogVideoRef = useRef<HTMLVideoElement>(null);
+  const { t } = useTranslation('announcements');
 
   useEffect(() => {
     fetchAnnouncements();
@@ -408,10 +410,10 @@ export default function Announcements() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-primary mb-2">
-            News & Announcements
+            {t('title')}
           </h1>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-            Stay updated with the latest news, opportunities, and events from the NUGSA-Germany community
+            {t('subtitle')}
           </p>
         </div>
 
@@ -422,7 +424,7 @@ export default function Announcements() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search announcements..."
+                  placeholder={t('filters.search')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -435,7 +437,7 @@ export default function Announcements() {
                     <SelectValue placeholder="Filter by category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="all">{t('filters.allCategories')}</SelectItem>
                     <SelectItem value="scholarships">🎓 Scholarships</SelectItem>
                     <SelectItem value="jobs">💼 Jobs</SelectItem>
                     <SelectItem value="sports">⚽ Sports</SelectItem>

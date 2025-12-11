@@ -413,9 +413,9 @@ export default function About() {
         {/* Leadership Section */}
         <section className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-primary mb-2">Our Leadership</h2>
+            <h2 className="text-2xl font-bold text-primary mb-2">Our Executives</h2>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              Meet the dedicated leaders driving our mission forward
+              Meet the dedicated executives driving our mission forward
             </p>
           </div>
 

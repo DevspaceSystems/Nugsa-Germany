@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 interface HeroImage {
   id: string;
@@ -23,6 +24,7 @@ export default function Home() {
   });
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { t } = useTranslation('home');
 
   useEffect(() => {
     fetchPublicStats();
@@ -172,12 +174,11 @@ export default function Home() {
             </div>
 
             <h1 className="heading-1 text-white mb-6 leading-tight">
-              Welcome to NUGSA-Germany
+              {t('hero.welcome')}
             </h1>
 
             <p className="body-large text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              The National Union of Ghanaian Student Associations in Germany.
-              Empowering students through community, support, and excellence.
+              {t('hero.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -192,12 +193,12 @@ export default function Home() {
                 <>
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
                     <Link to="/auth">
-                      Join Our Community
+                      {t('hero.joinCommunity')}
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Link>
                   </Button>
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 text-base font-semibold px-8 py-6 shadow-lg">
-                    <Link to="/about">Learn More</Link>
+                    <Link to="/about">{t('hero.learnMore')}</Link>
                   </Button>
                 </>
               )}
@@ -229,7 +230,7 @@ export default function Home() {
       <section className="section-padding bg-gray-50">
         <div className="section-container">
           <div className="text-center mb-16 slide-up">
-            <h2 className="heading-2 mb-4">Everything You Need to Succeed</h2>
+            <h2 className="heading-2 mb-4">{t('features.title')}</h2>
             <p className="body-large max-w-2xl mx-auto">
               Comprehensive resources and support designed specifically for Ghanaian students in Germany
             </p>
@@ -268,10 +269,9 @@ export default function Home() {
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="slide-up">
-              <h2 className="heading-2 mb-6">Why Join NUGSA-Germany?</h2>
+              <h2 className="heading-2 mb-6">{t('cta.title')}</h2>
               <p className="body-large mb-8 text-muted-foreground">
-                Become part of a thriving community that supports your academic journey,
-                professional growth, and cultural connection in Germany.
+                {t('cta.description')}
               </p>
               <ul className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -324,6 +324,94 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="section-padding bg-white border-y border-gray-100">
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <h2 className="heading-2 mb-4">Our Partners & Supporters</h2>
+            <p className="body-large text-muted-foreground max-w-2xl mx-auto">
+              Working together with esteemed organizations to support Ghanaian students in Germany
+            </p>
+          </div>
+
+          {/* Infinite Scrolling Logos */}
+          <div className="relative overflow-hidden">
+            <div className="flex animate-scroll">
+              {/* First set of logos */}
+              <div className="flex items-center justify-around min-w-full shrink-0 gap-16 px-8">
+                <img
+                  src="/partners/ghana_embassy_logo_1765457041265.png"
+                  alt="Ghana Embassy in Germany"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/daad_logo_1765457056937.png"
+                  alt="DAAD - German Academic Exchange Service"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/german_universities_logo_1765457071392.png"
+                  alt="German Universities"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/african_union_logo_1765457088679.png"
+                  alt="African Student Organizations"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/community_partners_logo_1765457105779.png"
+                  alt="Community Partners"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+              </div>
+
+              {/* Duplicate set for seamless loop */}
+              <div className="flex items-center justify-around min-w-full shrink-0 gap-16 px-8">
+                <img
+                  src="/partners/ghana_embassy_logo_1765457041265.png"
+                  alt="Ghana Embassy in Germany"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/daad_logo_1765457056937.png"
+                  alt="DAAD - German Academic Exchange Service"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/german_universities_logo_1765457071392.png"
+                  alt="German Universities"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/african_union_logo_1765457088679.png"
+                  alt="African Student Organizations"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+                <img
+                  src="/partners/community_partners_logo_1765457105779.png"
+                  alt="Community Partners"
+                  className="h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Partnership CTA */}
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground mb-4">
+              Interested in partnering with NUGSA-Germany?
+            </p>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/contact">
+                Get in Touch
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -1,0 +1,36 @@
+{
+    "title": "NUGSA Chapters Across Germany",
+    "subtitle": "Connect with your local chapter and join a vibrant community of Ghanaian students across Germany",
+    "stats": {
+        "activeChapters": "Active Chapters",
+        "totalMembers": "Total Members",
+        "recentActivities": "Recent Activities"
+    },
+    "search": {
+        "placeholder": "Search chapters by name, city, or description...",
+        "filterByRegion": "Filter by region",
+        "allRegions": "All Regions"
+    },
+    "card": {
+        "members": "members",
+        "established": "Est.",
+        "meetingSchedule": "Meeting Schedule",
+        "chapterExecutives": "Chapter Executives",
+        "more": "more",
+        "showLess": "Show Less",
+        "viewExecutives": "View Executives & Activities",
+        "executiveTeam": "Executive Team",
+        "recentActivities": "Recent Activities",
+        "contact": "Contact",
+        "attendees": "attendees"
+    },
+    "noChapters": {
+        "title": "No chapters found",
+        "description": "Try adjusting your search or filter criteria"
+    },
+    "cta": {
+        "title": "Want to Start a Chapter in Your City?",
+        "description": "We're always looking to expand our presence across Germany. If you're interested in starting a NUGSA chapter in your city, we'd love to hear from you!",
+        "getInTouch": "Get in Touch"
+    }
+}

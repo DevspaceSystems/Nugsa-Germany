@@ -1,0 +1,86 @@
+{
+    "title": "Über NUGSA Deutschland",
+    "subtitle": "Nationale Union ghanaischer Studentenvereinigungen",
+    "introduction": {
+        "title": "Einführung",
+        "content": "Die National Union of Ghanaian Student Associations (NUGSA) Foundation ist eine von Studenten geführte autonome und unpolitische, nicht-rassistische und nicht-religiöse Dachorganisation für ghanaische Studenten, Wissenschaftler und Akademiker in der Diaspora."
+    },
+    "slogan": {
+        "title": "Slogan & Emblem",
+        "education": "Bildung: ein Recht, kein Privileg",
+        "unity": "Einheit, Freiheit, Gerechtigkeit & Entwicklung"
+    },
+    "character": {
+        "title": "Charakter",
+        "democratic": "Demokratisch & Überparteilich",
+        "progressive": "Progressive Ideale",
+        "respect": "Respekt für Rechte"
+    },
+    "mission": {
+        "title": "Unsere Mission",
+        "content": "Alle ghanaischen Studenten, Wissenschaftler und Akademiker in der Diaspora zu mobilisieren und zu organisieren, um die Wiedergeburt unserer nationalen Vision zu gestalten."
+    },
+    "vision": {
+        "title": "Unsere Vision",
+        "content": "Dass Ghana das zentrale Zentrum der Entwicklung in Afrika wird."
+    },
+    "values": {
+        "title": "Unsere Werte",
+        "content": "Einheit, Freiheit, Bildung, Inklusion, Respekt und Entwicklung"
+    },
+    "objectives": {
+        "title": "Unsere Ziele",
+        "subtitle": "Die Kernziele, die unsere Aktivitäten und Initiativen in ganz Deutschland antreiben",
+        "rights": {
+            "title": "Rechte & Interessen",
+            "description": "Die Rechte und Interessen aller in Deutschland lebenden ghanaischen Studenten zu vertreten und zu bewahren."
+        },
+        "platform": {
+            "title": "Gemeinsame Plattform",
+            "deliberation": "Beratung über relevante Themen",
+            "coordination": "Koordination von Angelegenheiten",
+            "expression": "Freie Meinungsäußerung",
+            "virtues": "Vermittlung von Tugenden & Patriotismus"
+        },
+        "international": {
+            "title": "Internationale Beziehungen",
+            "description": "Zusammenarbeit, Verständnis und Freundschaft zwischen ghanaischen Studenten und anderen aus verschiedenen Orientierungen zu fördern."
+        },
+        "culture": {
+            "title": "Kulturelles Erbe",
+            "description": "Disziplin und revolutionäres Bewusstsein für unser kulturelles Erbe zu vermitteln und Mittel zu seiner Förderung bereitzustellen."
+        },
+        "panAfrican": {
+            "title": "Panafrikanismus",
+            "description": "Panafrikanismus zu fördern und die Einheit unter ghanaischen Studenten und anderen Studenten afrikanischer Abstammung zu stärken."
+        }
+    },
+    "pillars": {
+        "title": "Die 7 Säulen",
+        "subtitle": "Gemeinsam eine stärkere Gemeinschaft aufbauen"
+    },
+    "leadership": {
+        "title": "Unsere Führungskräfte",
+        "subtitle": "Lernen Sie die engagierten Führungskräfte kennen, die unsere Mission vorantreiben",
+        "boardMembers": "Vorstandsmitglieder",
+        "filterByYear": "Nach Jahr filtern",
+        "filterByPosition": "Nach Position filtern...",
+        "filterByName": "Nach Name filtern z.B.: Paul Abrokwa...",
+        "noMembers": "Keine aktiven Vorstandsmitglieder für dieses Jahr gefunden.",
+        "academic": "Akademisch:",
+        "experience": "Erfahrung:"
+    },
+    "constitution": {
+        "title": "NUGSA Verfassung",
+        "subtitle": "Unser Leitdokument, das unsere Operationen und Prinzipien leitet",
+        "documents": "Verfassungsdokumente",
+        "version": "Version:",
+        "viewDocument": "Dokument anzeigen",
+        "noDocuments": "Keine Verfassungsdokumente gefunden."
+    },
+    "closing": {
+        "quote": "Es gibt nur ein Ghana, unser Ghana, das Tor zu Afrika - unsere Heimat, und gemeinsam werden wir Ghana zum",
+        "hub": "Zentralen Zentrum der Entwicklung Afrikas",
+        "hashtag": "#NUGSA - #Gemeinsam4Ghana"
+    }
+}

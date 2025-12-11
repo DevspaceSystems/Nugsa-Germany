@@ -1,0 +1,30 @@
+{
+    "dashboard": {
+        "title": "Admin-Dashboard",
+        "welcome": "Willkommen zurück",
+        "overview": "Übersicht"
+    },
+    "tabs": {
+        "announcements": "Ankündigungen",
+        "boardMembers": "Vorstandsmitglieder",
+        "chapters": "Kapitel",
+        "gallery": "Galerie",
+        "settings": "Einstellungen",
+        "users": "Benutzer"
+    },
+    "actions": {
+        "add": "Neu hinzufügen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "save": "Änderungen speichern",
+        "cancel": "Abbrechen",
+        "publish": "Veröffentlichen",
+        "draft": "Als Entwurf speichern"
+    },
+    "messages": {
+        "saveSuccess": "Änderungen erfolgreich gespeichert",
+        "deleteSuccess": "Erfolgreich gelöscht",
+        "error": "Ein Fehler ist aufgetreten",
+        "confirmDelete": "Sind Sie sicher, dass Sie dieses Element löschen möchten?"
+    }
+}

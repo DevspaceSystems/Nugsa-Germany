@@ -1,0 +1,86 @@
+{
+    "title": "About NUGSA Germany",
+    "subtitle": "National Union of Ghanaian Student Associations",
+    "introduction": {
+        "title": "Introduction",
+        "content": "The National Union of Ghanaian Student Associations (NUGSA) Foundation is a Student-Led Autonomous and Non-Political, Non-Racial and Non-Religious umbrella organisation for Ghanaian Student, Scholars and Academics in the Diaspora."
+    },
+    "slogan": {
+        "title": "Slogan & Emblem",
+        "education": "Education: a right not a privilege",
+        "unity": "Unity, Freedom, Justice & Development"
+    },
+    "character": {
+        "title": "Character",
+        "democratic": "Democratic & Non-partisan",
+        "progressive": "Progressive Ideals",
+        "respect": "Respect for Rights"
+    },
+    "mission": {
+        "title": "Our Mission",
+        "content": "To Mobilise and Organise all Ghanaian Students, Scholars & Academics in the diaspora to engineer the Rebirth of our national vision."
+    },
+    "vision": {
+        "title": "Our Vision",
+        "content": "For Ghana to be the Central Hub of Development in Africa."
+    },
+    "values": {
+        "title": "Our Values",
+        "content": "Unity, Freedom, Education, Inclusion, Respect and Development"
+    },
+    "objectives": {
+        "title": "Our Objectives",
+        "subtitle": "The core aims that drive our activities and initiatives across Germany",
+        "rights": {
+            "title": "Rights & Interests",
+            "description": "To champion and preserve the rights and interests of all Ghanaian students' resident in Germany."
+        },
+        "platform": {
+            "title": "Common Platform",
+            "deliberation": "Deliberation of pertinent issues",
+            "coordination": "Co-ordination of affairs",
+            "expression": "Free expression of opinions",
+            "virtues": "Inculcating virtues & patriotism"
+        },
+        "international": {
+            "title": "International Relations",
+            "description": "To promote co-operation, understanding and friendship between Ghanaian students and others from diverse orientations."
+        },
+        "culture": {
+            "title": "Cultural Heritage",
+            "description": "To inculcate discipline and revolutionary awareness of our cultural heritage and provide means to promote it."
+        },
+        "panAfrican": {
+            "title": "Pan-Africanism",
+            "description": "To promote Pan-Africanism and foster unity among Ghanaian students and other students of African descent."
+        }
+    },
+    "pillars": {
+        "title": "The 7 Pillars",
+        "subtitle": "Building a stronger community together"
+    },
+    "leadership": {
+        "title": "Our Executives",
+        "subtitle": "Meet the dedicated executives driving our mission forward",
+        "boardMembers": "Board Members",
+        "filterByYear": "Filter by year",
+        "filterByPosition": "Filter by position...",
+        "filterByName": "Filter by name e.g: Paul Abrokwa...",
+        "noMembers": "No active board members found for this year.",
+        "academic": "Academic:",
+        "experience": "Experience:"
+    },
+    "constitution": {
+        "title": "NUGSA Constitution",
+        "subtitle": "Our governing document that guides our operations and principles",
+        "documents": "Constitution Documents",
+        "version": "Version:",
+        "viewDocument": "View Document",
+        "noDocuments": "No constitution documents found."
+    },
+    "closing": {
+        "quote": "There is only one Ghana, Our Ghana, the gateway to Africa - Our Homeland, and together, we shall make Ghana the",
+        "hub": "Central Hub of Africa's Development",
+        "hashtag": "#NUGSA - #Together4Ghana"
+    }
+}
