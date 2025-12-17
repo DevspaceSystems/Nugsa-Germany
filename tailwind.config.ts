@@ -7,6 +7,8 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+		"./nugsa-germany-bot/components/**/*.{ts,tsx}",
+		"./nugsa-germany-bot/App.tsx",
 	],
 	prefix: "",
 	theme: {
