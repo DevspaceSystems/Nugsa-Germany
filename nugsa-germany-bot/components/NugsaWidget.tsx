@@ -34,7 +34,7 @@ export default function NugsaWidget() {
       size: SAMPLE_MESSAGE_CONTENT.length
     }
   ]);
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -147,20 +147,20 @@ export default function NugsaWidget() {
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden font-sans">
       {/* Widget Container - Positioned Bottom Right */}
-      <div className="absolute bottom-5 right-5 flex flex-col items-end gap-4 pointer-events-auto">
-        
+      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3 sm:gap-4 pointer-events-auto">
+
         {/* Chat Window Popup */}
-        <div 
+        <div
           className={`
             origin-bottom-right transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
-            w-[360px] h-[600px] max-h-[80vh] max-w-[calc(100vw-40px)]
+            w-[calc(100vw-32px)] sm:w-[360px] h-[calc(100vh-100px)] sm:h-[600px] max-h-[80vh]
             bg-gray-950 rounded-2xl shadow-2xl border border-gray-800
             flex flex-col overflow-hidden
             ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-4 pointer-events-none'}
           `}
         >
-          <ChatInterface 
-            messages={messages.filter(m => m.role !== 'system')} 
+          <ChatInterface
+            messages={messages.filter(m => m.role !== 'system')}
             isLoading={isLoading}
             onSendMessage={handleSendMessage}
             files={files}
@@ -173,8 +173,11 @@ export default function NugsaWidget() {
         <button
           onClick={toggleWidget}
           className={`
-            group relative flex items-center justify-center w-16 h-16 rounded-full shadow-2xl
-            transition-all duration-300 transform hover:scale-105 active:scale-95 border-2 border-white/10
+            group relative flex items-center justify-center 
+            w-12 h-12 
+            rounded-full shadow-2xl
+            transition-all duration-300 transform hover:scale-105 active:scale-95 
+            border-2 border-white/10
             ${isOpen ? 'bg-gray-800' : 'bg-white overflow-hidden p-0'}
           `}
           aria-label={isOpen ? "Close chat" : "Open chat"}
@@ -182,19 +185,19 @@ export default function NugsaWidget() {
           {isOpen ? (
             <X size={24} className="text-gray-300" />
           ) : (
-             // If image loads successfully, show it. Otherwise fallback to icon.
-             !imgError ? (
-                <img 
-                  src={LOGO_URL} 
-                  alt="NUGSA Bot" 
-                  className="w-full h-full object-cover"
-                  onError={() => setImgError(true)}
-                />
-             ) : (
-                <MessageCircle size={28} className="text-indigo-600" />
-             )
+            // If image loads successfully, show it. Otherwise fallback to icon.
+            !imgError ? (
+              <img
+                src={LOGO_URL}
+                alt="NUGSA Bot"
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <MessageCircle size={28} className="text-indigo-600" />
+            )
           )}
-          
+
           {/* Notification Dot */}
           {!hasInteracted && !isOpen && (
             <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-900 animate-pulse"></span>

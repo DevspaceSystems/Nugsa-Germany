@@ -27,7 +27,6 @@ export default function Home() {
   const { t } = useTranslation('home');
 
   useEffect(() => {
-    fetchPublicStats();
     fetchHeroImages();
   }, []);
 
@@ -57,42 +56,7 @@ export default function Home() {
     }
   };
 
-  const fetchPublicStats = async () => {
-    try {
-      const { count: activeStudents } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("is_verified", true);
 
-      const { data: statesData } = await supabase
-        .from("profiles")
-        .select("india_state")
-        .eq("is_verified", true)
-        .not("india_state", "is", null);
-
-      const uniqueStates = new Set(
-        statesData?.map(item => item.india_state?.trim().toLowerCase()).filter(Boolean)
-      );
-
-      const { data: universitiesData } = await supabase
-        .from("profiles")
-        .select("university")
-        .eq("is_verified", true)
-        .not("university", "is", null);
-
-      const uniqueUniversities = new Set(
-        universitiesData?.map(item => item.university?.trim().toLowerCase()).filter(Boolean)
-      );
-
-      setStats({
-        activeStudents: activeStudents || 0,
-        germanStates: uniqueStates.size,
-        universities: uniqueUniversities.size
-      });
-    } catch (error) {
-      console.error("Error fetching public stats:", error);
-    }
-  };
 
   const features = [
     {
@@ -137,12 +101,7 @@ export default function Home() {
     "Emergency financial support when needed"
   ];
 
-  const statsData = [
-    { number: stats.activeStudents > 0 ? `${stats.activeStudents}+` : "500+", label: "Active Members", icon: Users },
-    { number: stats.germanStates > 0 ? `${stats.germanStates}+` : "16", label: "German States", icon: MapPin },
-    { number: stats.universities > 0 ? `${stats.universities}+` : "50+", label: "Universities", icon: GraduationCap },
-    { number: "24/7", label: "Support Available", icon: Shield },
-  ];
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -207,24 +166,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="bg-primary/95 text-white border-t border-primary-foreground/10">
-        <div className="section-container py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {statsData.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <stat.icon className="w-5 h-5 text-secondary mr-2" />
-                  <div className="text-3xl md:text-4xl font-bold text-white">
-                    {stat.number}
-                  </div>
-                </div>
-                <div className="text-sm text-white/80 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Features Section */}
       <section className="section-padding bg-gray-50">

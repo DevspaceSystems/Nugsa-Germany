@@ -11,7 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "@/hooks/use-toast";
-import { Building2, MapPin, Users, Edit, ArrowLeft, Save, Plus } from "lucide-react";
+import { Building2, MapPin, Users, Edit, ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ChapterExecutivesManager } from "./chapters/ChapterExecutivesManager";
 import { ChapterActivitiesManager } from "./chapters/ChapterActivitiesManager";
 
@@ -41,7 +52,23 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
     const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [view, setView] = useState<'list' | 'edit'>('list');
+    const [view, setView] = useState<'list' | 'edit' | 'create'>('list');
+
+    const defaultChapter: Chapter = {
+        id: '',
+        name: '',
+        city: '',
+        region: '',
+        description: '',
+        contact_email: '',
+        contact_phone: '',
+        meeting_schedule: '',
+        logo_url: null,
+        cover_image_url: null,
+        is_active: true,
+        member_count: 0,
+        social_media: {}
+    };
 
     // Fetch chapters on mount
     useEffect(() => {
@@ -118,10 +145,66 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
         }
     };
 
+    const handleCreateChapter = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedChapter) return;
+
+        try {
+            setSaving(true);
+            // Remove id from the object to let Supabase generate it
+            const { id, ...newChapterData } = selectedChapter;
+
+            const { data, error } = await supabase
+                .from("chapters" as any)
+                .insert([newChapterData])
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            toast({ title: "Success", description: "Chapter created successfully" });
+            await fetchChapters();
+
+            // Switch to edit mode with the new chapter to allow adding executives/activities immediately
+            setSelectedChapter(data as Chapter);
+            setView('edit');
+        } catch (error) {
+            console.error("Error creating chapter:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to create chapter"
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteChapter = async (chapterId: string) => {
+        try {
+            const { error } = await supabase
+                .from("chapters" as any)
+                .delete()
+                .eq("id", chapterId);
+
+            if (error) throw error;
+
+            toast({ title: "Success", description: "Chapter deleted successfully" });
+            fetchChapters();
+        } catch (error) {
+            console.error("Error deleting chapter:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to delete chapter"
+            });
+        }
+    };
+
     if (loading) return <LoadingSpinner size="lg" />;
 
-    // Edit View with Tabs
-    if (view === 'edit' && selectedChapter) {
+    // Edit/Create View with Tabs
+    if ((view === 'edit' || view === 'create') && selectedChapter) {
         return (
             <div className="space-y-6">
                 <div className="flex items-center gap-4">
@@ -131,10 +214,14 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                         </Button>
                     )}
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{selectedChapter.name}</h2>
-                        <p className="text-muted-foreground flex items-center gap-2">
-                            <MapPin className="w-3 h-3" /> {selectedChapter.city}, {selectedChapter.region}
-                        </p>
+                        <h2 className="text-2xl font-bold tracking-tight">
+                            {view === 'create' ? 'Create New Chapter' : selectedChapter.name}
+                        </h2>
+                        {view === 'edit' && (
+                            <p className="text-muted-foreground flex items-center gap-2">
+                                <MapPin className="w-3 h-3" /> {selectedChapter.city}, {selectedChapter.region}
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -148,11 +235,13 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                     <TabsContent value="details">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Chapter Information</CardTitle>
-                                <CardDescription>Update the basic details of this chapter.</CardDescription>
+                                <CardTitle>{view === 'create' ? 'New Chapter Details' : 'Chapter Information'}</CardTitle>
+                                <CardDescription>
+                                    {view === 'create' ? 'Enter the details for the new chapter.' : 'Update the basic details of this chapter.'}
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleUpdateChapter} className="space-y-6">
+                                <form onSubmit={view === 'create' ? handleCreateChapter : handleUpdateChapter} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label>Chapter Name</Label>
@@ -230,7 +319,7 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                                     <div className="flex justify-end">
                                         <Button type="submit" disabled={saving}>
                                             {saving && <LoadingSpinner size="sm" className="mr-2" />}
-                                            Save Changes
+                                            {view === 'create' ? 'Create Chapter' : 'Save Changes'}
                                         </Button>
                                     </div>
                                 </form>
@@ -238,29 +327,33 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                         </Card>
                     </TabsContent>
 
-                    <TabsContent value="executives">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Chapter Executives</CardTitle>
-                                <CardDescription>Manage your chapter's executive team.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ChapterExecutivesManager chapterId={selectedChapter.id} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                    {view === 'edit' && (
+                        <>
+                            <TabsContent value="executives">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Chapter Executives</CardTitle>
+                                        <CardDescription>Manage your chapter's executive team.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ChapterExecutivesManager chapterId={selectedChapter.id} />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
 
-                    <TabsContent value="activities">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Activities & Events</CardTitle>
-                                <CardDescription>Post and manage chapter activities.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ChapterActivitiesManager chapterId={selectedChapter.id} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                            <TabsContent value="activities">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Activities & Events</CardTitle>
+                                        <CardDescription>Post and manage chapter activities.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ChapterActivitiesManager chapterId={selectedChapter.id} />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </>
+                    )}
                 </Tabs>
             </div>
         );
@@ -274,6 +367,13 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                     <CardTitle>NUGSA Chapters</CardTitle>
                     <CardDescription>Manage all chapters across Germany</CardDescription>
                 </div>
+                <Button onClick={() => {
+                    setSelectedChapter(defaultChapter);
+                    setView('create');
+                }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Chapter
+                </Button>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -309,6 +409,30 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                                         <Edit className="w-4 h-4 mr-2" />
                                         Manage
                                     </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Chapter</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to delete {chapter.name}? This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={() => handleDeleteChapter(chapter.id)}
+                                                    className="bg-red-600 hover:bg-red-700"
+                                                >
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </TableCell>
                             </TableRow>
                         ))}

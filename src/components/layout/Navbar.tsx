@@ -24,7 +24,7 @@ export function Navbar() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
 
   useEffect(() => {
     if (user) {
@@ -242,18 +242,28 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
+        <div className="md:hidden border-t border-gray-200 bg-white max-h-[calc(100vh-5rem)] overflow-y-auto pb-8">
           <div className="px-4 pt-2 pb-4 space-y-1">
             {mobileNavLinks.map((link: any) => (
-              <Link
+              <div
                 key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-gray-50 rounded-md transition-colors"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate(link.path);
+                }}
+                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-gray-50 rounded-md transition-colors cursor-pointer"
               >
                 {link.label}
-              </Link>
+              </div>
             ))}
+
+            {/* Mobile Language Switcher */}
+            <div className="px-4 py-3 border-t border-gray-100 mt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-base font-medium text-foreground">Language</span>
+                <LanguageSwitcher />
+              </div>
+            </div>
 
             {user ? (
               <>

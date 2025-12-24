@@ -454,6 +454,13 @@ export default function Chapters() {
                                                         </div>
                                                     )}
 
+                                                    {/* Empty State */}
+                                                    {chapter.leaders.length === 0 && chapter.activities.length === 0 && (
+                                                        <div className="text-center py-6 text-muted-foreground">
+                                                            <p>No additional details available for this chapter yet.</p>
+                                                        </div>
+                                                    )}
+
                                                     {/* Activities */}
                                                     {chapter.activities.length > 0 && (
                                                         <div className="space-y-3">

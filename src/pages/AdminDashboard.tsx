@@ -287,6 +287,9 @@ export default function AdminDashboard() {
         return;
       }
 
+      // Set user details for filtering
+      setUserRole(profile?.role);
+      setIsVerified(profile?.is_verified);
       setManagedChapterId((profile as any).managed_chapter_id);
 
       // If only chapter lead, set explicit tab
@@ -462,7 +465,7 @@ export default function AdminDashboard() {
       setAssistanceRequests(
         (data || []).map((item: any) => ({
           ...item,
-          status: item.status as 'pending' | 'in_progress' | 'resolved'
+          status: (item.status || 'pending') as 'pending' | 'in_progress' | 'resolved'
         }))
       );
     } catch (error) {
@@ -508,18 +511,22 @@ export default function AdminDashboard() {
       };
 
       data?.forEach(setting => {
-        if (setting.setting_key === 'bank_transfer_details') {
-          settings.bank_transfer_details = typeof setting.setting_value === "string"
+        try {
+          const val = typeof setting.setting_value === "string"
             ? JSON.parse(setting.setting_value)
             : setting.setting_value;
-        } else if (setting.setting_key === 'mobile_money_details') {
-          settings.mobile_money_details = typeof setting.setting_value === "string"
-            ? JSON.parse(setting.setting_value)
-            : setting.setting_value;
-        } else if (setting.setting_key === 'contact_details') {
-          settings.contact_details = typeof setting.setting_value === "string"
-            ? JSON.parse(setting.setting_value)
-            : setting.setting_value;
+
+          if (val && typeof val === 'object') {
+            if (setting.setting_key === 'bank_transfer_details') {
+              settings.bank_transfer_details = { ...settings.bank_transfer_details, ...val };
+            } else if (setting.setting_key === 'mobile_money_details') {
+              settings.mobile_money_details = { ...settings.mobile_money_details, ...val };
+            } else if (setting.setting_key === 'contact_details') {
+              settings.contact_details = { ...settings.contact_details, ...val };
+            }
+          }
+        } catch (e) {
+          console.error(`Error parsing setting ${setting.setting_key}`, e);
         }
       });
 
@@ -2121,8 +2128,13 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Debug Info - Remove in production */}
+        {/* <div className="bg-yellow-100 p-2 text-xs mb-4 rounded">
+          Debug: Role={userRole}, Verified={String(isVerified)}, ManagedChapter={managedChapterId}
+        </div> */}
+
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b">
+        <div className="flex flex-wrap gap-2 mb-8 border-b relative z-10">
           {[
             { id: "verification", label: "Verification", icon: UserCheck, adminOnly: true },
             { id: "chapters", label: "Chapter Management", icon: Building2, adminOnly: false },
@@ -2136,7 +2148,10 @@ export default function AdminDashboard() {
             { id: "hero", label: "Hero Images", icon: Calendar, adminOnly: true },
             { id: "platform", label: "Settings", icon: Settings, adminOnly: true }
           ]
-            .filter(tab => !managedChapterId || !tab.adminOnly) // If chapter lead, only show non-adminOnly tabs
+            .filter(tab => {
+              const isGlobalAdmin = userRole === "admin" && isVerified;
+              return isGlobalAdmin || !tab.adminOnly;
+            })
             .map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -2155,7 +2170,11 @@ export default function AdminDashboard() {
         {/* Tab Content */}
         <div className="space-y-6">
           {activeTab === "verification" && <VerificationModule onStatsUpdate={fetchStats} />}
-          {activeTab === "chapters" && <ChapterManager managedChapterId={managedChapterId} />}
+          {activeTab === "chapters" && (
+            <ChapterManager
+              managedChapterId={userRole === "admin" && isVerified ? null : managedChapterId}
+            />
+          )}
           {activeTab === "board" && renderBoardMembersTab()}
           {activeTab === "constitution" && renderConstitutionTab()}
           {activeTab === "announcements" && renderAnnouncementsTab()}
