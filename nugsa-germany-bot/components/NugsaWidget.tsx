@@ -147,7 +147,7 @@ export default function NugsaWidget() {
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden font-sans">
       {/* Widget Container - Positioned Bottom Right */}
-      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3 sm:gap-4 pointer-events-auto">
+      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3 sm:gap-4 pointer-events-none">
 
         {/* Chat Window Popup */}
         <div
@@ -156,7 +156,7 @@ export default function NugsaWidget() {
             w-[calc(100vw-32px)] sm:w-[360px] h-[calc(100vh-100px)] sm:h-[600px] max-h-[80vh]
             bg-gray-950 rounded-2xl shadow-2xl border border-gray-800
             flex flex-col overflow-hidden
-            ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-4 pointer-events-none'}
+            ${isOpen ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-90 translate-y-4 pointer-events-none hidden'}
           `}
         >
           <ChatInterface
@@ -177,7 +177,7 @@ export default function NugsaWidget() {
             w-12 h-12 
             rounded-full shadow-2xl
             transition-all duration-300 transform hover:scale-105 active:scale-95 
-            border-2 border-white/10
+            border-2 border-white/10 pointer-events-auto
             ${isOpen ? 'bg-gray-800' : 'bg-white overflow-hidden p-0'}
           `}
           aria-label={isOpen ? "Close chat" : "Open chat"}
