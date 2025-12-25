@@ -54,6 +54,10 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
     const [saving, setSaving] = useState(false);
     const [view, setView] = useState<'list' | 'edit' | 'create'>('list');
 
+    // File states
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+
     const defaultChapter: Chapter = {
         id: '',
         name: '',
@@ -67,7 +71,12 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
         cover_image_url: null,
         is_active: true,
         member_count: 0,
-        social_media: {}
+        social_media: {
+            facebook: '',
+            instagram: '',
+            linkedin: '',
+            twitter: ''
+        }
     };
 
     // Fetch chapters on mount
@@ -89,11 +98,18 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
             if (error) throw error;
 
             const fetchedChapters = (data as any) || [];
-            setChapters(fetchedChapters);
+
+            // Normalize social_media field
+            const normalizedChapters = fetchedChapters.map((ch: any) => ({
+                ...ch,
+                social_media: ch.social_media || { facebook: '', instagram: '', linkedin: '', twitter: '' }
+            }));
+
+            setChapters(normalizedChapters);
 
             // If managing specific chapter, automatically select it
-            if (managedChapterId && fetchedChapters.length > 0) {
-                setSelectedChapter(fetchedChapters[0]);
+            if (managedChapterId && normalizedChapters.length > 0) {
+                setSelectedChapter(normalizedChapters[0]);
                 setView('edit');
             }
         } catch (error) {
@@ -108,12 +124,41 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
         }
     };
 
+    const uploadImage = async (file: File, path: string) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${path}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('chapter-images')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('chapter-images')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    };
+
     const handleUpdateChapter = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedChapter) return;
 
         try {
             setSaving(true);
+            let logoUrl = selectedChapter.logo_url;
+            let coverUrl = selectedChapter.cover_image_url;
+
+            if (logoFile) {
+                logoUrl = await uploadImage(logoFile, 'logos');
+            }
+
+            if (coverFile) {
+                coverUrl = await uploadImage(coverFile, 'covers');
+            }
+
             const { error } = await supabase
                 .from("chapters" as any)
                 .update({
@@ -125,7 +170,10 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                     contact_phone: selectedChapter.contact_phone,
                     meeting_schedule: selectedChapter.meeting_schedule,
                     is_active: selectedChapter.is_active,
-                    member_count: selectedChapter.member_count
+                    member_count: selectedChapter.member_count,
+                    logo_url: logoUrl,
+                    cover_image_url: coverUrl,
+                    social_media: selectedChapter.social_media
                 })
                 .eq("id", selectedChapter.id);
 
@@ -151,22 +199,44 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
 
         try {
             setSaving(true);
+            let logoUrl = selectedChapter.logo_url;
+            let coverUrl = selectedChapter.cover_image_url;
+
+            if (logoFile) {
+                logoUrl = await uploadImage(logoFile, 'logos');
+            }
+
+            if (coverFile) {
+                coverUrl = await uploadImage(coverFile, 'covers');
+            }
+
             // Remove id from the object to let Supabase generate it
             const { id, ...newChapterData } = selectedChapter;
 
+            // Ensure URLs are set
+            const chapterToSave = {
+                ...newChapterData,
+                logo_url: logoUrl,
+                cover_image_url: coverUrl
+            };
+
             const { data, error } = await supabase
                 .from("chapters" as any)
-                .insert([newChapterData])
+                .insert([chapterToSave])
                 .select()
                 .single();
 
             if (error) throw error;
+            if (!data) throw new Error("No data returned");
 
             toast({ title: "Success", description: "Chapter created successfully" });
             await fetchChapters();
 
             // Switch to edit mode with the new chapter to allow adding executives/activities immediately
-            setSelectedChapter(data as Chapter);
+            setSelectedChapter({
+                ...(data as any),
+                social_media: (data as any).social_media || { facebook: '', instagram: '', linkedin: '', twitter: '' }
+            } as Chapter);
             setView('edit');
         } catch (error) {
             console.error("Error creating chapter:", error);
@@ -201,12 +271,23 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
         }
     };
 
+    const handleSocialMediaChange = (platform: string, value: string) => {
+        if (!selectedChapter) return;
+        setSelectedChapter({
+            ...selectedChapter,
+            social_media: {
+                ...selectedChapter.social_media,
+                [platform]: value
+            }
+        });
+    };
+
     if (loading) return <LoadingSpinner size="lg" />;
 
     // Edit/Create View with Tabs
     if ((view === 'edit' || view === 'create') && selectedChapter) {
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in duration-300" key={selectedChapter.id || 'new'}>
                 <div className="flex items-center gap-4">
                     {!managedChapterId && (
                         <Button variant="outline" size="icon" onClick={() => setView('list')}>
@@ -228,8 +309,8 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                 <Tabs defaultValue="details">
                     <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
-                        <TabsTrigger value="executives">Executives</TabsTrigger>
-                        <TabsTrigger value="activities">Activities</TabsTrigger>
+                        <TabsTrigger value="executives" disabled={view === 'create'}>Executives</TabsTrigger>
+                        <TabsTrigger value="activities" disabled={view === 'create'}>Activities</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="details">
@@ -243,6 +324,56 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                             <CardContent>
                                 <form onSubmit={view === 'create' ? handleCreateChapter : handleUpdateChapter} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                        {/* Image Uploads */}
+                                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/20 rounded-lg">
+                                            <div className="space-y-2">
+                                                <Label>Chapter Logo</Label>
+                                                <div className="flex items-center gap-4">
+                                                    {selectedChapter.logo_url || logoFile ? (
+                                                        <img
+                                                            src={logoFile ? URL.createObjectURL(logoFile) : selectedChapter.logo_url!}
+                                                            alt="Logo"
+                                                            className="w-16 h-16 rounded object-cover border"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-16 h-16 rounded border border-dashed flex items-center justify-center text-muted-foreground">
+                                                            Logo
+                                                        </div>
+                                                    )}
+                                                    <Input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={e => e.target.files && setLogoFile(e.target.files[0])}
+                                                        className="flex-1"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>Cover Image</Label>
+                                                <div className="flex items-center gap-4">
+                                                    {selectedChapter.cover_image_url || coverFile ? (
+                                                        <img
+                                                            src={coverFile ? URL.createObjectURL(coverFile) : selectedChapter.cover_image_url!}
+                                                            alt="Cover"
+                                                            className="w-24 h-16 rounded object-cover border"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-24 h-16 rounded border border-dashed flex items-center justify-center text-muted-foreground">
+                                                            Cover
+                                                        </div>
+                                                    )}
+                                                    <Input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={e => e.target.files && setCoverFile(e.target.files[0])}
+                                                        className="flex-1"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-2">
                                             <Label>Chapter Name</Label>
                                             <Input
@@ -307,6 +438,45 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                                         </div>
                                     </div>
 
+                                    {/* Social Media Links */}
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <h3 className="text-md font-semibold">Social Media Links</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Facebook</Label>
+                                                <Input
+                                                    value={selectedChapter.social_media?.facebook || ''}
+                                                    onChange={e => handleSocialMediaChange('facebook', e.target.value)}
+                                                    placeholder="Facebook URL"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Instagram</Label>
+                                                <Input
+                                                    value={selectedChapter.social_media?.instagram || ''}
+                                                    onChange={e => handleSocialMediaChange('instagram', e.target.value)}
+                                                    placeholder="Instagram URL"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>LinkedIn</Label>
+                                                <Input
+                                                    value={selectedChapter.social_media?.linkedin || ''}
+                                                    onChange={e => handleSocialMediaChange('linkedin', e.target.value)}
+                                                    placeholder="LinkedIn URL"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Twitter / X</Label>
+                                                <Input
+                                                    value={selectedChapter.social_media?.twitter || ''}
+                                                    onChange={e => handleSocialMediaChange('twitter', e.target.value)}
+                                                    placeholder="Twitter URL"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-2">
                                         <Label>Description</Label>
                                         <Textarea
@@ -362,25 +532,37 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
     // List View (For Global Admins)
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>NUGSA Chapters</CardTitle>
-                    <CardDescription>Manage all chapters across Germany</CardDescription>
+            <CardHeader>
+                <div className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>NUGSA Chapters</CardTitle>
+                        <CardDescription>Manage all chapters across Germany</CardDescription>
+                    </div>
+                    <div className="flex-shrink-0 relative z-20">
+                        <Button
+                            onClick={() => {
+                                const freshChapter = {
+                                    ...defaultChapter,
+                                    social_media: { facebook: '', instagram: '', linkedin: '', twitter: '' }
+                                };
+                                setSelectedChapter(freshChapter);
+                                setLogoFile(null);
+                                setCoverFile(null);
+                                setView('create');
+                            }}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            New Chapter
+                        </Button>
+                    </div>
                 </div>
-                <Button onClick={() => {
-                    setSelectedChapter(defaultChapter);
-                    setView('create');
-                }}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Chapter
-                </Button>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Chapter Name</TableHead>
-                            <TableHead>Region</TableHead>
+                            <TableHead>Location</TableHead>
                             <TableHead>Members</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
@@ -389,7 +571,14 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                     <TableBody>
                         {chapters.map((chapter) => (
                             <TableRow key={chapter.id}>
-                                <TableCell className="font-medium">{chapter.name}</TableCell>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        {chapter.logo_url && (
+                                            <img src={chapter.logo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                        )}
+                                        {chapter.name}
+                                    </div>
+                                </TableCell>
                                 <TableCell>{chapter.city}, {chapter.region}</TableCell>
                                 <TableCell>{chapter.member_count}</TableCell>
                                 <TableCell>
@@ -403,6 +592,8 @@ export function ChapterManager({ managedChapterId }: ChapterManagerProps) {
                                         size="sm"
                                         onClick={() => {
                                             setSelectedChapter(chapter);
+                                            setLogoFile(null);
+                                            setCoverFile(null);
                                             setView('edit');
                                         }}
                                     >

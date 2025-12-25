@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import Layout from '@/components/layout/Layout';
 import { MaintenanceGuard } from '@/components/guards/MaintenanceGuard';
+import { ChatbotWrapper } from '@/components/ChatbotWrapper';
 
 // Lazy load all pages for better performance
 const Home = lazy(() => import("./pages/Home"));
@@ -57,6 +58,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ChatbotWrapper />
           <Suspense fallback={<PageLoader />}>
             <MaintenanceGuard>
               <Routes>
