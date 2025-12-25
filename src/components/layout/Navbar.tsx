@@ -67,6 +67,7 @@ export function Navbar() {
       { label: t('nav.gallery'), path: "/gallery" },
       { label: "Directory", path: "/students" },
       { label: t('nav.announcements'), path: "/announcements" },
+      { label: t('nav.assistance'), path: "/assistance" },
     ];
 
     const canAccessAdmin = (userProfile?.role === 'admin' && userProfile?.is_verified) || (userProfile as any)?.managed_chapter_id;

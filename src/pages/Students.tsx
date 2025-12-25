@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, GraduationCap, MessageSquare, Linkedin, Users, BookOpen, User, School } from "lucide-react";
+import { Search, MapPin, GraduationCap, MessageSquare, Linkedin, Users, BookOpen, User, School, Lock, ArrowRight, UserPlus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -93,24 +93,24 @@ export default function Students() {
   };
 
   const getUniqueValues = (field: keyof Profile): string[] => {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  
-  students.forEach(student => {
-    const value = student[field];
-    if (typeof value === 'string' && value.trim() !== '') {
-      const normalizedValue = value.toLowerCase().trim();
-      
-      // If we haven't seen this value before (case-insensitive)
-      if (!seen.has(normalizedValue)) {
-        seen.add(normalizedValue);
-        result.push(value); // Add the original value with original case
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    students.forEach(student => {
+      const value = student[field];
+      if (typeof value === 'string' && value.trim() !== '') {
+        const normalizedValue = value.toLowerCase().trim();
+
+        // If we haven't seen this value before (case-insensitive)
+        if (!seen.has(normalizedValue)) {
+          seen.add(normalizedValue);
+          result.push(value); // Add the original value with original case
+        }
       }
-    }
-  });
-  
-  return result.sort(); // Optional: sort alphabetically
-};
+    });
+
+    return result.sort(); // Optional: sort alphabetically
+  };
 
   const handleSendMessage = async (recipientId: string, recipientName: string) => {
     if (!user) {
@@ -147,6 +147,78 @@ export default function Students() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+        <div className="max-w-4xl w-full">
+          <div className="text-center space-y-8">
+            {/* Lock Icon Section */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-150 animate-pulse"></div>
+                <div className="relative w-24 h-24 rounded-3xl bg-white shadow-2xl flex items-center justify-center border border-gray-100">
+                  <Lock className="w-12 h-12 text-primary" />
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+                Connect with the <span className="text-primary italic">Community</span>
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                The Student Directory is an exclusive space for NUGSA-Germany members.
+                Sign in to discover, connect, and network with fellow Ghanaian students across Germany.
+              </p>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-3xl mx-auto">
+              {[
+                { icon: Users, title: "Find Peers", desc: "Locate students in your university or state." },
+                { icon: MessageSquare, title: "Direct Chat", desc: "Send messages and build networks." },
+                { icon: GraduationCap, title: "Academic Sharing", desc: "Find peers in your field of study." }
+              ].map((feature, i) => (
+                <div key={i} className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <feature.icon className="w-6 h-6 text-primary mb-3" />
+                  <h3 className="font-bold text-gray-900 mb-1">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Button
+                size="lg"
+                className="btn-primary px-8 py-7 text-lg w-full sm:w-auto h-auto rounded-2xl group shadow-lg shadow-primary/20"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In to View
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="px-8 py-7 text-lg w-full sm:w-auto h-auto rounded-2xl border-2 hover:bg-gray-50 hover:text-primary text-gray-700 transition-all font-semibold"
+                onClick={() => navigate("/auth?mode=register")}
+              >
+                <UserPlus className="mr-2 w-5 h-5 text-primary" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Trust Hint */}
+            <p className="text-sm text-muted-foreground italic">
+              Join {students.length || "hundreds"}+ verified Ghanaian students already connected.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="section-container py-12 space-y-10">
@@ -162,7 +234,7 @@ export default function Students() {
             <p className="body-large text-muted-foreground">
               Connect with NUGSA-Germany members across universities and German states. Build professional networks
               and support each other throughout your academic journey.
-          </p>
+            </p>
           </div>
         </div>
 
@@ -279,8 +351,8 @@ export default function Students() {
                 {/* Profile Header */}
                 <div className="hero-background p-8 text-white text-center">
                   <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-white/20">
-                    <AvatarImage 
-                      src={student.profile_image_url || ""} 
+                    <AvatarImage
+                      src={student.profile_image_url || ""}
                       alt={`${student.first_name} ${student.last_name}`}
                       className="object-cover" // This prevents distortion
                     />
@@ -315,7 +387,7 @@ export default function Students() {
                     )}
                   </div>
 
-                  
+
                 </div>
 
                 {/* Profile Content */}
@@ -351,7 +423,7 @@ export default function Students() {
                   {student.bio && (
                     <div className="bg-muted/50 p-3 rounded-lg">
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        {student.bio} 
+                        {student.bio}
                       </p>
                     </div>
                   )}
@@ -369,8 +441,8 @@ export default function Students() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="btn-primary flex-1"
                       onClick={() => handleSendMessage(student.id, `${student.first_name} ${student.last_name}`)}
                     >
@@ -400,8 +472,8 @@ export default function Students() {
             <p className="text-muted-foreground max-w-md mx-auto">
               Try adjusting your search terms or filter criteria to find the students you're looking for.
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="mt-6 btn-outline"
               onClick={() => {
                 setSearchTerm("");
@@ -423,8 +495,8 @@ export default function Students() {
               <p className="body-large text-muted-foreground max-w-2xl mx-auto">
                 Create an account to connect directly with members, send messages, and access exclusive resources.
               </p>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="btn-primary px-8"
                 onClick={() => navigate("/auth")}
               >

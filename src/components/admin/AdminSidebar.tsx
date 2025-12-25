@@ -7,10 +7,11 @@ import {
     MessageSquare,
     ShieldCheck,
     Building2,
-    Image as ImageIcon,
+    ImageIcon,
     Menu,
     X,
-    LogOut
+    LogOut,
+    Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,12 @@ export function AdminSidebar({
             id: "inquiries",
             label: "Inquiries",
             icon: MessageSquare,
+            show: userRole === 'admin'
+        },
+        {
+            id: "assistance",
+            label: "Assistance",
+            icon: Heart,
             show: userRole === 'admin'
         },
         {

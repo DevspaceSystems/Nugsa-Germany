@@ -14,8 +14,9 @@ import { ConstitutionManager } from "@/components/admin/ConstitutionManager";
 import { AnnouncementsManager } from "@/components/admin/AnnouncementsManager";
 import { InquiriesManager } from "@/components/admin/InquiriesManager";
 import { FinanceManager } from "@/components/admin/FinanceManager";
+import { AssistanceManager } from "@/components/admin/AssistanceManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ShieldCheck, MessageSquare, Building2, UserCheck } from "lucide-react";
+import { Users, ShieldCheck, MessageSquare, Building2, UserCheck, Heart } from "lucide-react";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -30,7 +31,9 @@ export default function AdminDashboard() {
     verifiedStudents: 0,
     pendingVerifications: 0,
     totalInquiries: 0,
-    pendingInquiries: 0
+    pendingInquiries: 0,
+    totalAssistance: 0,
+    pendingAssistance: 0
   });
 
   useEffect(() => {
@@ -93,13 +96,17 @@ export default function AdminDashboard() {
         { count: verifiedStudents },
         { count: pendingVerifications },
         { count: totalInquiries },
-        { count: pendingInquiries }
+        { count: pendingInquiries },
+        { count: totalAssistance },
+        { count: pendingAssistance }
       ] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student"),
         supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student").eq("is_verified", true),
         supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student").eq("is_verified", false),
         supabase.from("contact_inquiries").select("*", { count: "exact", head: true }),
-        supabase.from("contact_inquiries").select("*", { count: "exact", head: true }).eq("status", "pending")
+        supabase.from("contact_inquiries").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("assistance_requests").select("*", { count: "exact", head: true }),
+        supabase.from("assistance_requests").select("*", { count: "exact", head: true }).eq("status", "pending")
       ]);
 
       setStats({
@@ -107,7 +114,9 @@ export default function AdminDashboard() {
         verifiedStudents: verifiedStudents || 0,
         pendingVerifications: pendingVerifications || 0,
         totalInquiries: totalInquiries || 0,
-        pendingInquiries: pendingInquiries || 0
+        pendingInquiries: pendingInquiries || 0,
+        totalAssistance: totalAssistance || 0,
+        pendingAssistance: pendingAssistance || 0
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -145,44 +154,56 @@ export default function AdminDashboard() {
           <div className="space-y-6 animate-in fade-in duration-500">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard Overview</h1>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalStudents}</div>
-                  <p className="text-xs text-muted-foreground">Registered in the platform</p>
-                </CardContent>
-              </Card>
-              <Card className="shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                className="shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => setActiveSection('verification')}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Verified Students</CardTitle>
                   <UserCheck className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.verifiedStudents}</div>
-                  <p className="text-xs text-muted-foreground">Successfully verified accounts</p>
+                  <p className="text-xs text-muted-foreground">Active members</p>
                 </CardContent>
               </Card>
-              <Card className="shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                className="shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => setActiveSection('verification')}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Pending Verifications</CardTitle>
                   <ShieldCheck className="h-4 w-4 text-yellow-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.pendingVerifications}</div>
-                  <p className="text-xs text-muted-foreground">Awaiting admin review</p>
+                  <p className="text-xs text-muted-foreground">Awaiting review</p>
                 </CardContent>
               </Card>
-              <Card className="shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                className="shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => setActiveSection('inquiries')}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Pending Inquiries</CardTitle>
                   <MessageSquare className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.pendingInquiries}</div>
-                  <p className="text-xs text-muted-foreground">Unresolved contact messages</p>
+                  <p className="text-xs text-muted-foreground">Contact messages</p>
+                </CardContent>
+              </Card>
+              <Card
+                className="shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => setActiveSection('assistance')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Assistance</CardTitle>
+                  <Heart className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.pendingAssistance}</div>
+                  <p className="text-xs text-muted-foreground">Help requests</p>
                 </CardContent>
               </Card>
             </div>
@@ -214,6 +235,8 @@ export default function AdminDashboard() {
         return <ConstitutionManager />;
       case 'inquiries':
         return <InquiriesManager />;
+      case 'assistance':
+        return <AssistanceManager />;
       case 'finance':
         return <FinanceManager />;
       case 'settings':

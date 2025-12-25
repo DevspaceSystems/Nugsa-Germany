@@ -297,8 +297,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-amber-50/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Header */}
         {/* <div className="mb-12 text-center">
           <div className="glass-effect rounded-2xl p-8 mb-8 floating-animation">
@@ -322,24 +322,46 @@ export default function Profile() {
           </div>
         </div> */}
 
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-3">
+              My Profile
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Manage your personal and academic information
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              {profile.is_verified ? (
+                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 text-sm shadow-md">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Verified Profile
+                </Badge>
+              ) : (
+                <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-1.5 text-sm shadow-md">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Pending Verification
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Profile Picture Section */}
           <div className="lg:col-span-1">
-            <div className="neon-card p-6 text-center pulse-glow">
-              <h3 className="text-xl font-semibold gradient-text mb-6 flex items-center justify-center">
-                <Camera className="w-5 h-5 mr-2" />
+            <div className="profile-card text-center sticky top-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center justify-center gap-2">
+                <Camera className="w-5 h-5 text-primary" />
                 Profile Photo
               </h3>
-              <div className="relative group">
-                <Avatar className="w-40 h-40 mx-auto mb-6 border-4 border-purple-200 shadow-lg transition-all duration-300 group-hover:border-purple-400">
+              <div className="profile-avatar-container mb-6">
+                <Avatar className="w-44 h-44 mx-auto border-4 border-primary/20 shadow-xl transition-all duration-300 hover:border-primary/40 hover:shadow-2xl">
                   <AvatarImage src={profile.profile_image_url || ""} alt="Profile" className="object-cover" />
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-purple-100 to-pink-100">
-                    <User className="w-20 h-20 text-purple-600" />
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-100 to-amber-100">
+                    <User className="w-20 h-20 text-primary" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
-                  <Camera className="w-6 h-6 text-white" />
-                </div>
               </div>
               <input
                 type="file"
@@ -352,7 +374,7 @@ export default function Profile() {
                 }}
               />
               <button
-                className="neon-button w-full mb-4"
+                className="modern-button w-full mb-3 flex items-center justify-center"
                 onClick={() => document.getElementById('profile-image')?.click()}
                 disabled={uploading}
               >
@@ -364,75 +386,84 @@ export default function Profile() {
                 ) : (
                   <>
                     <Camera className="w-4 h-4 mr-2" />
-                    Upload New Photo
+                    Upload Photo
                   </>
                 )}
               </button>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-gray-500">
                 JPG, PNG or GIF (max 1MB)
               </p>
             </div>
           </div>
 
           {/* Profile Form */}
-          <div className="lg:col-span-3 space-y-8">
+          <div className="lg:col-span-3 space-y-6">
             {/* Personal Information */}
-            <div className="neon-card p-8">
-              <h3 className="text-2xl font-bold gradient-text mb-2">Personal Information</h3>
-              <p className="text-muted-foreground mb-6">Your basic personal details</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Personal Information</h3>
+                  <p className="text-sm text-gray-500">Your basic personal details</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name" className="text-sm font-medium text-foreground">First Name</Label>
+                  <Label htmlFor="first_name" className="text-sm font-medium text-gray-700">First Name</Label>
                   <Input
                     id="first_name"
                     value={profile.first_name}
                     onChange={(e) => handleInputChange("first_name", e.target.value)}
-                    className="neon-input"
+                    className="input-modern"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name" className="text-sm font-medium text-foreground">Last Name</Label>
+                  <Label htmlFor="last_name" className="text-sm font-medium text-gray-700">Last Name</Label>
                   <Input
                     id="last_name"
                     value={profile.last_name}
                     onChange={(e) => handleInputChange("last_name", e.target.value)}
-                    className="neon-input"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
                   <Input
                     id="email"
                     value={profile.email}
                     disabled
-                    className="bg-gray-100"
+                    className="bg-gray-100 border-gray-200 cursor-not-allowed"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="india_phone">Phone Number (Germany)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="india_phone" className="text-sm font-medium text-gray-700">Phone Number (Germany)</Label>
                   <Input
                     id="india_phone"
                     value={profile.india_phone || ""}
                     onChange={(e) => handleInputChange("india_phone", e.target.value)}
                     placeholder="+49 1512 3456789"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="ghana_mobile_number">Ghana Mobile Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="ghana_mobile_number" className="text-sm font-medium text-gray-700">Ghana Mobile Number</Label>
                   <Input
                     id="ghana_mobile_number"
                     value={profile.ghana_mobile_number || ""}
                     onChange={(e) => handleInputChange("ghana_mobile_number", e.target.value)}
                     placeholder="+233 24 123 4567"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="gender">Gender</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="gender" className="text-sm font-medium text-gray-700">Gender</Label>
                   <Select
                     value={profile.gender || ""}
                     onValueChange={(value) => handleInputChange("gender", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="input-modern">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -443,19 +474,13 @@ export default function Profile() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="marital_status">Marital Status</Label>
-                  {/* <Input
-                    id="marital_status"
-                    value={profile.marital_status || ""}
-                    onChange={(e) => handleInputChange("marital_status", e.target.value)}
-                    placeholder="Single, Married, Divorced,..."
-                  /> */}
+                <div className="space-y-2">
+                  <Label htmlFor="marital_status" className="text-sm font-medium text-gray-700">Marital Status</Label>
                   <Select
                     value={profile.marital_status || ""}
                     onValueChange={(value) => handleInputChange("marital_status", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="input-modern">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -466,52 +491,61 @@ export default function Profile() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="date_of_birth">Date of Birth</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="date_of_birth" className="text-sm font-medium text-gray-700">Date of Birth</Label>
                   <DatePicker
                     selected={profile.date_of_birth ? new Date(profile.date_of_birth) : null}
                     onChange={(date: Date | null) => handleInputChange("date_of_birth", date ? date.toISOString().split('T')[0] : null)}
                     dateFormat="yyyy-MM-dd"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-200 bg-gradient-to-br from-white to-gray-50/30"
                     placeholderText="Select date of birth"
                     showYearDropdown
                     yearDropdownItemNumber={100}
                     scrollableYearDropdown
                   />
                 </div>
-                <div>
-                  <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp_number" className="text-sm font-medium text-gray-700">WhatsApp Number</Label>
                   <Input
                     id="whatsapp_number"
                     value={profile.whatsapp_number || ""}
                     onChange={(e) => handleInputChange("whatsapp_number", e.target.value)}
                     placeholder="+233 24 123 4567"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin_url" className="text-sm font-medium text-gray-700">LinkedIn URL</Label>
                   <Input
                     id="linkedin_url"
                     value={profile.linkedin_url || ""}
                     onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
+                    className="input-modern"
                   />
                 </div>
               </div>
             </div>
 
             {/* Academic Information */}
-            <div className="neon-card p-8">
-              <h3 className="text-2xl font-bold gradient-text mb-2">Academic Information</h3>
-              <p className="text-muted-foreground mb-6">Your educational details in Germany</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center">
+                  <GraduationCap className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <Label htmlFor="level_of_study">Level of Study</Label>
+                  <h3 className="text-xl font-bold text-gray-800">Academic Information</h3>
+                  <p className="text-sm text-gray-500">Your educational details in Germany</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="level_of_study" className="text-sm font-medium text-gray-700">Level of Study</Label>
                   <Select
                     value={profile.level_of_study || ""}
                     onValueChange={(value) => handleInputChange("level_of_study", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="input-modern">
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -522,33 +556,35 @@ export default function Profile() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="year_of_enrollment">Year of Enrollment</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="year_of_enrollment" className="text-sm font-medium text-gray-700">Year of Enrollment</Label>
                   <Input
                     id="year_of_enrollment"
                     type="number"
                     value={profile.year_of_enrollment || ""}
                     onChange={(e) => handleInputChange("year_of_enrollment", parseInt(e.target.value))}
                     placeholder="2020"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="expected_completion_year">Expected Completion Year</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="expected_completion_year" className="text-sm font-medium text-gray-700">Expected Completion Year</Label>
                   <Input
                     id="expected_completion_year"
                     type="number"
                     value={profile.expected_completion_year || ""}
                     onChange={(e) => handleInputChange("expected_completion_year", parseInt(e.target.value))}
                     placeholder="2024"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="university">University/Institution</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="university" className="text-sm font-medium text-gray-700">University/Institution</Label>
                   <Select
                     value={profile.university || ""}
                     onValueChange={(value) => handleInputChange("university", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="input-modern">
                       <SelectValue placeholder="Select your university" />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
@@ -560,22 +596,23 @@ export default function Profile() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="major">Major/Course</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="major" className="text-sm font-medium text-gray-700">Major/Course</Label>
                   <Input
                     id="major"
                     value={profile.major || ""}
                     onChange={(e) => handleInputChange("major", e.target.value)}
                     placeholder="e.g., Computer Science"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="year_of_study">Current Year of Study</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="year_of_study" className="text-sm font-medium text-gray-700">Current Year of Study</Label>
                   <Select
                     value={profile.year_of_study?.toString() || ""}
                     onValueChange={(value) => handleInputChange("year_of_study", parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="input-modern">
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -596,158 +633,179 @@ export default function Profile() {
             </div>
 
             {/* Address Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold gradient-text mb-2">Address Information</CardTitle>
-                <CardDescription>Your current and permanent addresses</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-4">German Address</h4>
+                  <h3 className="text-xl font-bold text-gray-800">Address Information</h3>
+                  <p className="text-sm text-gray-500">Your current and permanent addresses</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>
+                    German Address
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="india_address">Street Address</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="india_address" className="text-sm font-medium text-gray-700">Street Address</Label>
                       <Input
                         id="india_address"
                         value={profile.india_address || ""}
                         onChange={(e) => handleInputChange("india_address", e.target.value)}
                         placeholder="123 Main Street"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="india_city">City</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="india_city" className="text-sm font-medium text-gray-700">City</Label>
                       <Input
                         id="india_city"
                         value={profile.india_city || ""}
                         onChange={(e) => handleInputChange("india_city", e.target.value)}
                         placeholder="Berlin"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="india_state">State</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="india_state" className="text-sm font-medium text-gray-700">State</Label>
                       <Input
                         id="india_state"
                         value={profile.india_state || ""}
                         onChange={(e) => handleInputChange("india_state", e.target.value)}
                         placeholder="Berlin"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="india_pincode">Postal Code</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="india_pincode" className="text-sm font-medium text-gray-700">Postal Code</Label>
                       <Input
                         id="india_pincode"
                         value={profile.india_pincode || ""}
                         onChange={(e) => handleInputChange("india_pincode", e.target.value)}
                         placeholder="10115"
+                        className="input-modern"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="same_address"
-                    checked={profile.same_as_current_address || false}
-                    onCheckedChange={(checked) => handleInputChange("same_as_current_address", checked)}
-                  />
-                  <Label htmlFor="same_address">Same as current address</Label>
-                </div> */}
-
-                {/* {!profile.same_as_current_address && ( */}
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-4">Ghanaian Address</h4>
+                <div className="border-t border-gray-200 pt-6">
+                  <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                    Ghanaian Address
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="ghana_address">Street Address</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="ghana_address" className="text-sm font-medium text-gray-700">Street Address</Label>
                       <Input
                         id="ghana_address"
                         value={profile.ghana_address || ""}
                         onChange={(e) => handleInputChange("ghana_address", e.target.value)}
                         placeholder="123 Main Street"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="ghana_region">State/Region</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="ghana_region" className="text-sm font-medium text-gray-700">State/Region</Label>
                       <Input
                         id="ghana_region"
                         value={profile.ghana_region || ""}
                         onChange={(e) => handleInputChange("ghana_region", e.target.value)}
                         placeholder="Accra"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="ghana_city">City</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="ghana_city" className="text-sm font-medium text-gray-700">City</Label>
                       <Input
                         id="ghana_city"
                         value={profile.ghana_city || ""}
                         onChange={(e) => handleInputChange("ghana_city", e.target.value)}
                         placeholder="Suyane"
+                        className="input-modern"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="ghana_pincode">Postal Code</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="ghana_pincode" className="text-sm font-medium text-gray-700">Postal Code</Label>
                       <Input
                         id="ghana_pincode"
                         value={profile.ghana_pincode || ""}
                         onChange={(e) => handleInputChange("ghana_pincode", e.target.value)}
                         placeholder="GA-123-4567"
+                        className="input-modern"
                       />
                     </div>
                   </div>
                 </div>
-                {/* )} */}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
 
 
             {/* Emergency Contact */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold gradient-text mb-2">Emergency Contact</CardTitle>
-                <CardDescription>Emergency contact information</CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <Label htmlFor="emergency_name">Full Name</Label>
+                  <h3 className="text-xl font-bold text-gray-800">Emergency Contact</h3>
+                  <p className="text-sm text-gray-500">Emergency contact information</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="emergency_name" className="text-sm font-medium text-gray-700">Full Name</Label>
                   <Input
                     id="emergency_name"
                     value={profile.emergency_contact_name || ""}
                     onChange={(e) => handleInputChange("emergency_contact_name", e.target.value)}
                     placeholder="John Doe"
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="emergency_relationship">Relationship</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="emergency_relationship" className="text-sm font-medium text-gray-700">Relationship</Label>
                   <Input
                     id="emergency_relationship"
                     value={profile.emergency_contact_relationship || ""}
                     onChange={(e) => handleInputChange("emergency_contact_relationship", e.target.value)}
                     placeholder="Father, Mother, Sibling, etc."
+                    className="input-modern"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="emergency_number">Contact Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="emergency_number" className="text-sm font-medium text-gray-700">Contact Number</Label>
                   <Input
                     id="emergency_number"
                     value={profile.emergency_contact_number || ""}
                     onChange={(e) => handleInputChange("emergency_contact_number", e.target.value)}
                     placeholder="+233 24 123 4567"
+                    className="input-modern"
                   />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Document Uploads */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold gradient-text mb-2">Document Uploads</CardTitle>
-                <CardDescription>Upload your passport and other documents</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <Label htmlFor="passport">Passport Document</Label>
-                  <div className="flex items-center gap-4 mt-2">
+                  <h3 className="text-xl font-bold text-gray-800">Document Uploads</h3>
+                  <p className="text-sm text-gray-500">Upload your passport and other documents</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="passport" className="text-sm font-medium text-gray-700 mb-2 block">Passport Document</Label>
+                  <div className="flex items-center gap-4">
                     <input
                       type="file"
                       id="passport-document"
@@ -770,6 +828,7 @@ export default function Profile() {
                       variant="outline"
                       onClick={() => document.getElementById('passport-document')?.click()}
                       disabled={uploading}
+                      className="border-2 hover:border-primary hover:bg-primary/5 transition-all"
                     >
                       {uploading ? (
                         <>
@@ -788,41 +847,46 @@ export default function Profile() {
                         variant="ghost"
                         size="sm"
                         onClick={() => window.open(profile.passport_document_url!, '_blank')}
+                        className="text-primary hover:text-primary/80"
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View Document
                       </Button>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-2">
                     PDF or Image file (max 2MB)
                   </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Bio Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold gradient-text mb-2">About Me</CardTitle>
-                <CardDescription>Tell other students about yourself</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={profile.bio || ""}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  placeholder="Write a brief bio about yourself, your interests, goals, etc."
-                  rows={4}
-                />
-              </CardContent>
-            </Card>
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">About Me</h3>
+                  <p className="text-sm text-gray-500">Tell other students about yourself</p>
+                </div>
+              </div>
+              <Textarea
+                value={profile.bio || ""}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                placeholder="Write a brief bio about yourself, your interests, goals, etc."
+                rows={4}
+                className="input-modern resize-none"
+              />
+            </div>
 
             {/* Save Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-4">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="neon-button px-12 py-4 text-lg font-semibold min-w-48"
+                className="modern-button px-16 py-4 text-lg font-bold shadow-xl flex items-center justify-center min-w-64"
               >
                 {saving ? (
                   <>
@@ -831,7 +895,8 @@ export default function Profile() {
                   </>
                 ) : (
                   <>
-                    <Save className="w-5 h-5 mr-3" /> Update Profile
+                    <Save className="w-5 h-5 mr-3" />
+                    Update Profile
                   </>
                 )}
               </button>
@@ -839,25 +904,28 @@ export default function Profile() {
 
 
 
-            {/* Add Password Update Section */}
-            <div className="neon-card p-6">
-              <h3 className="text-xl font-semibold gradient-text mb-6 flex items-center justify-center">
-                <Key className="w-5 h-5 mr-2" />
-                Update Password
-              </h3>
+            {/* Password Update Section */}
+            <div className="profile-card">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                  <Key className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Update Password</h3>
+                  <p className="text-sm text-gray-500">Change your account password</p>
+                </div>
+              </div>
 
               <div className="space-y-4">
-
-
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="new-password" className="text-sm font-medium text-gray-700">New Password</Label>
                   <div className="relative">
                     <Input
                       id="new-password"
                       type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="neon-input pr-10"
+                      className="input-modern pr-10"
                     />
                     <button
                       type="button"
@@ -874,14 +942,14 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">Confirm New Password</Label>
                   <div className="relative">
                     <Input
                       id="confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="neon-input pr-10"
+                      className="input-modern pr-10"
                     />
                     <button
                       type="button"
@@ -900,7 +968,7 @@ export default function Profile() {
                 <Button
                   onClick={handlePasswordUpdate}
                   disabled={updatingPassword || !newPassword || !confirmPassword}
-                  className="w-full neon-button"
+                  className="w-full modern-button"
                 >
                   {updatingPassword ? (
                     <>
